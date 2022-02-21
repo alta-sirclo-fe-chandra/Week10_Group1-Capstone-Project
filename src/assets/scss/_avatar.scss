@@ -1,0 +1,25 @@
+.avatar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: normal;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  &.img-thumbnail {
+    padding: 4px;
+    max-width: none;
+  }
+
+  & > * {
+    height: 100%;
+    width: 100%;
+  }
+}
