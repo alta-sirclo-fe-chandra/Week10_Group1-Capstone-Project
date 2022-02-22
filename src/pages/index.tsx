@@ -1,5 +1,11 @@
+import Schedule from "../components/schedule";
+
 const Index = () => {
-  return <div>Index</div>;
+  return (
+    <>
+      <Schedule />
+    </>
+  );
 };
 
 export default Index;
