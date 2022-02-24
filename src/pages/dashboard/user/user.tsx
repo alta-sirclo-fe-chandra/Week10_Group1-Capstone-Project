@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import axios from "axios";
 import moment from "moment";
+import 'moment/locale/id';
+import { Button, Modal, ModalBody } from "react-bootstrap";
 import Calendar from "react-calendar";
 import 'react-calendar/dist/Calendar.css';
 import EmployeeCard from "../../../components/employeeCard";
 import RequestStatusLabel from "../../../components/requestStatusLabel";
 import "../user/user.module.css";
-import { FaSort } from "react-icons/fa";
+import { FaSort, FaSyringe, FaInfoCircle } from "react-icons/fa";
 
 const User = () => {
   const token: string | null = localStorage.getItem('token');
@@ -16,14 +18,24 @@ const User = () => {
   const [employeeImage, setEmployeeImage] = useState<string>('');
   const [employeeNIK, setEmployeeNIK] = useState<string>('');
   const [employeeOffice, setEmployeeOffice] = useState<string>('');
+  const [employeeVaccineStat, setEmployeeVaccineStat] = useState<string>('');
 
   const [offices, setOffices] = useState<string[]>([]);
 
   const [certificates, setCertificates] = useState<string[]>();
 
+  const [date, setDate] = useState<string>('');
+
+  const [attendants, setAttendants] = useState<[]>([]);
+  
+  const [showRequestModal, setShowRequestModal] = useState<boolean>(false);
+  const [showCertificateModal, setShowCertificateModal] = useState<boolean>(false);
+  
   const certificateStatus: string[] = ['Belum Diunggah', 'Menunggu Verifikasi', 'Terverifikasi'];
 
-  const employees: string[] = ['alpaca', 'barnacle', 'capybara', 'donkey', 'eagle', 'falcon', 'gorilla'];
+  const [dose, setDose] = useState<number>(1);
+
+  const [file, setFile] = useState<any>();
 
   useEffect(() => {
     axios
@@ -39,6 +51,7 @@ const User = () => {
         setEmployeeImage(data.image_url);
         setEmployeeNIK(data.nik);
         setEmployeeOffice(data.office);
+        setEmployeeVaccineStat(data.vaccine_status);
       })
       .catch((err) => {
         console.log(err);
@@ -67,8 +80,77 @@ const User = () => {
       .catch((err) => {
         console.log(err);
       });
-  }, [employeeName])
+  }, [employeeName]);
 
+  const handleShowAttendanceByDate = async(id: number) => {
+    await axios
+      .get(`https://richap.space/schedules/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+      })
+      .then((res) => {
+        const { data } = res;
+        setAttendants(data.user);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+  const formatDate = (date: string) => {
+    const month = date.slice(4,7);
+    return `${date.slice(11,15)}`+
+      `${month === 'Jan' ? '01'
+        : month === 'Feb' ? '02'
+        : month === 'Mar' ? '03'
+        : month === 'Apr' ? '04'
+        : month === 'May' ? '05'
+        : month === 'Jun' ? '06'
+        : month === 'Jul' ? '07'
+        : month === 'Aug' ? '08'
+        : month === 'Sep' ? '09'
+        : month === 'Oct' ? '10'
+        : month === 'Nov' ? '11'
+        : '12'}`+
+      `${date.slice(8,10)}`;
+  }
+
+  const handleRequestModal = () => {
+    setShowRequestModal(true);
+  }
+  const handleCloseRequestModal = () => {
+    setShowRequestModal(false);
+  }
+
+  const handleCertificateModal = () => {
+    setShowCertificateModal(true);
+  }
+  const handleCloseCertificateModal = () => {
+    setShowCertificateModal(false);
+  }
+  const handleCertificateUpload = async() => {
+    setShowCertificateModal(false);
+    const formData = new FormData();
+    formData.append("image", file);
+    formData.append("vaccinedose", "2");
+    formData.append("description", `vaksin ke-${2}`);
+
+    await axios
+      .post('https://richap.space/certificates', formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`
+        },
+      })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+  
   return (
     <div className="container">
       {/* Whole Page */}
@@ -82,7 +164,7 @@ const User = () => {
           {/* CheckIn Card */}
           <div className="container d-flex col p-2 mr-4 justify-content-between" style={{border: "1px solid grey", borderRadius: "5px", width: "90%"}}>
             <div className="col">
-              <h6>{moment().format("dddd, MMMM Do YYYY")}</h6>
+              <h6>{moment().format("dddd, Do MMMM YYYY")}</h6>
               <h6 style={{fontSize: "0.8rem"}} className="text-muted">{moment().format("HH.MM") + " WIB"}</h6>
             </div>
             <div className="d-flex align-items-center">
@@ -107,7 +189,11 @@ const User = () => {
                   showFixedNumberOfWeeks={true}
                   prev2Label={null}
                   next2Label={null}
-                  onClickDay={(value, event) => alert(`Clicked day: ${value}`)}/>
+                  onClickDay={(value) => {
+                    setDate(value.toString());
+                    handleShowAttendanceByDate(parseInt(value.toString().slice(8,10)));
+                  }}
+                />
               </div>
             </div>
             {/* Attendance Section */}
@@ -115,19 +201,76 @@ const User = () => {
               <div>
                 Karyawan Work from Office
               </div>
-              <div data-bs-spy="scroll" data-bs-offset="0" className="scrollspy-example" tabIndex={0} style={{height: '290px', overflowY: 'scroll'}}>
-                {employees?.map((employee: string, index: number) => (
+              {attendants
+              ? <div data-bs-spy="scroll" data-bs-offset="0" className="scrollspy-example" tabIndex={0} style={{height: '290px', overflowY: 'scroll'}}>
+                {attendants?.map((attendant: any, index: number) => (
                   <div key={index}>
                     <EmployeeCard
-                      image={'https://apsec.iafor.org/wp-content/uploads/sites/37/2017/02/IAFOR-Blank-Avatar-Image.jpg'}
-                      employee={employee}
-                      wfoDate="20220205"
-                      wfoLocation="Traveloka Campus" />
+                      image={attendant.image_url}
+                      employee={attendant.name}
+                      wfoDate={formatDate(date)}
+                      wfoLocation={attendant.office} />
                   </div>
                 ))}
               </div>
+              : <div className="d-flex align-items-center justify-content-center" style={{height: "290px"}}>Belum ada permohonan</div>
+              }
               <div style={{marginTop: "10px"}}>
-                <button className="btn btn-secondary" style ={{width: "inherit"}}>Request WFO</button>
+                <button
+                  className="btn btn-secondary"
+                  style ={{width: "inherit"}}
+                  data-toggle="tooltip"
+                  data-placement="top"
+                  title="Jangan lupa validasi tanggalnya"
+                  onClick={handleRequestModal}>
+                    Request WFO
+                </button>
+                {/* Request Modal */}
+                <div>
+                  <Modal show={showRequestModal} onHide={handleCloseRequestModal} centered>
+                    <Modal.Header closeButton>
+                      <Modal.Title>Permohonan WFO</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body style={{backgroundColor: "lightgrey"}}>
+                      <div className="row col-12">
+                        <div className="col w-50">
+                          <div className="text-muted" style={{fontSize: "0.7rem"}}>Tanggal</div>
+                          <div>
+                            <strong>
+                              {date
+                                ? moment(formatDate(date)).format("Do MMMM YYYY")
+                                : moment().add('1', 'days').format("Do MMMM YYYY")}
+                            </strong>
+                          </div>
+                        </div>
+                        <div className="col w-50">
+                          <div className="text-muted" style={{fontSize: "0.7rem"}}>Lokasi</div>
+                          <div><strong>{employeeOffice}</strong></div>
+                        </div>
+                      </div>
+                    </Modal.Body>
+                    <ModalBody>
+                      <div className="row col-12">
+                        <div className="col w-50">
+                          <div className="text-muted" style={{fontSize: "0.7rem"}}>Pemohon</div>
+                          <div>{employeeName}</div>
+                        </div>
+                        <div className="col w-50">
+                          <div className="text-muted" style={{fontSize: "0.7rem"}}>NIK</div>
+                          <div>{employeeNIK}</div>
+                        </div>
+                      </div>
+                    </ModalBody>
+                    <Modal.Footer>
+                      <Button variant="outline-tertiary" onClick={handleCloseRequestModal}>
+                        Kembali
+                      </Button>
+                      <Button variant="secondary" onClick={handleCloseRequestModal}>
+                        Kirim Permohonan WFO
+                      </Button>
+                    </Modal.Footer>
+                  </Modal>
+                </div>
               </div>
             </div>
           </div>
@@ -213,15 +356,17 @@ const User = () => {
           </div>
 
           {/* Vaccine Card */}
-          <div className="my-4" style={{border: "1px solid grey", borderRadius: "5px"}}>
+          <div className="my-4" style={{border: "1px solid grey", borderRadius: "5px", margin: "0"}}>
             <div className="d-flex row container pt-2">
               Sertifikat Vaksin
-              <hr />
+            </div>
+            <div className="pb-2">
+              <hr style={{width: "calc(100% - 10px)", margin: "0 auto"}} />
             </div>
             <ul>
               {certificates?.map((certificate: string, index: number) => (
                 <li key={index}
-                  className="d-flex container justify-content-between pb-2">
+                  className="d-flex container justify-content-between pb-1">
                   <div className="col">
                     <div>
                       {`Vaksin ${index+1}`}
@@ -235,14 +380,53 @@ const User = () => {
                     ? <button className="btn btn-sm disabled" style={{fontSize: "0.7rem"}}>
                         Unggah Sertifikat
                       </button>
-                    : <button className="btn btn-sm" style={{fontSize: "0.7rem"}}>
+                    : <button className="btn btn-sm" style={{fontSize: "0.7rem"}}
+                        onClick={handleCertificateModal}>
                         Unggah Sertifikat
                       </button>
                     }
                   </div>
+                  {/* Certificate Modal */}
+                  <div>
+                    <Modal show={showCertificateModal} onHide={handleCloseCertificateModal} centered>
+                      <Modal.Header closeButton>
+                        <Modal.Title>Unggah Sertifikat Vaksin {index+1}</Modal.Title>
+                      </Modal.Header>
+                      <Modal.Body>
+                        <input type="file"
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                            const fileList = e.target.files;
+                            if(!fileList) return;
+                            setFile(fileList);
+                          }}
+                        />
+                      </Modal.Body>
+                      <Modal.Footer>
+                        <Button variant="outline-tertiary" onClick={handleCloseCertificateModal}>
+                          Kembali
+                        </Button>
+                        <Button variant="secondary" onClick={handleCertificateModal}>
+                          Unggah File
+                        </Button>
+                      </Modal.Footer>
+                    </Modal>
+                  </div>
                 </li>
               ))}
             </ul>
+            {employeeVaccineStat === "Approve"
+            ? <div className="container mb-2 p-2" style={{backgroundColor: "lightgrey", margin: "0 auto", width: "calc(100% - 10px)", borderRadius: "5px"}}>
+                <span><FaSyringe /></span> &nbsp; Verifikasi vaksinasi selesai
+              </div>
+            : <div className="d-flex container mb-2 p-2" style={{backgroundColor: "lightgrey", margin: "0 auto", width: "calc(100% - 10px)", borderRadius: "5px"}}>
+                <div className="px-2 py-1 d-flex align-items-center">
+                  <FaInfoCircle height="40px" width="40px" />
+                </div>
+                <div className="d-flex align-items-center">
+                  Lengkapi sertifikat vaksinmu untuk membuat permohonan WFO
+                </div>
+              </div>
+            }
           </div>
         </div>
 
