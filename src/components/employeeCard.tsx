@@ -1,4 +1,5 @@
 import moment from 'moment';
+import 'moment/locale/id';
 
 type wfoEmployee = {
   image: string;
@@ -16,7 +17,7 @@ const EmployeeCard = (wfoEmployee: wfoEmployee) => {
       <div className="card-body" style={{width: '85%', margin: '0', padding: '0'}}>
         <strong style={{fontSize: '0.9rem'}}>{wfoEmployee.employee}</strong>
         <div className="text-muted" style={{fontSize: '0.75rem'}}>
-          {moment(wfoEmployee.wfoDate).format('dddd, MMMM Do YYYY')} @ {wfoEmployee.wfoLocation}
+          {moment(wfoEmployee.wfoDate).format('dddd, Do MMMM YYYY')} @ {wfoEmployee.wfoLocation}
         </div>
       </div>
     </div>
