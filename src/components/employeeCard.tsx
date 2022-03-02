@@ -15,7 +15,7 @@ const EmployeeCard = (wfoEmployee: wfoEmployee) => {
         <img src={wfoEmployee.image} width="30px" height="30px" alt='' style={{borderRadius: "50%"}}/>
       </div>
       <div className="card-body" style={{width: '85%', margin: '0', padding: '0'}}>
-        <strong style={{fontSize: '0.9rem'}}>{wfoEmployee.employee}</strong>
+        <strong style={{fontSize: '0.9rem', textTransform: "capitalize"}}>{wfoEmployee.employee}</strong>
         <div className="text-muted" style={{fontSize: '0.75rem'}}>
           {moment(wfoEmployee.wfoDate).format('dddd, Do MMMM YYYY')} @ {wfoEmployee.wfoLocation}
         </div>
