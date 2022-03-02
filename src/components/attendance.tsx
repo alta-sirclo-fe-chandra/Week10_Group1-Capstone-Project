@@ -1,44 +1,32 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+import axios from "axios";
 import moment from "moment";
-import { useState } from "react";
-import { Modal, Pagination } from "react-bootstrap";
-import DataTable from "react-data-table-component";
-import ReactDatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { BsCheckCircleFill, BsThreeDots } from "react-icons/bs";
 import Lottie from "react-lottie";
+import Swal from "sweetalert2";
 import animationData from "../assets/lotties/loading-spinner.json";
+import DataTable from "react-data-table-component";
+import "react-datepicker/dist/react-datepicker.css";
+import { ChangeEvent, useEffect, useState } from "react";
+import { Modal, Pagination } from "react-bootstrap";
+import { BsCheckCircleFill, BsThreeDots } from "react-icons/bs";
+import { FaMapMarkerAlt } from "react-icons/fa";
+import { IoAlertCircle } from "react-icons/io5";
+import { attendance, office } from "../types";
 
 const Attendance = () => {
-  const [dateRange, setDateRange] = useState<any[]>([new Date(), new Date()]);
-  const [startDate, endDate] = dateRange;
-  const [page] = useState([1]);
-  const [activePage] = useState(1);
+  const [page, setPage] = useState([1]);
+  const [totalPage, setTotalPage] = useState(1);
+  const [activePage, setActivePage] = useState(1);
+  const [totalData, setTotalData] = useState(0);
   const [isLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
-
-  const data = [
-    {
-      id: 1,
-      date: "22 Feb 2022",
-      name: "Arlene McCoy",
-      office: "Traveloka Campus",
-      status: "menunggu verifikasi",
-    },
-    {
-      id: 2,
-      date: "22 Feb 2022",
-      name: "Arlene McCoy",
-      office: "Traveloka Campus",
-      status: "menunggu verifikasi",
-    },
-    {
-      id: 3,
-      date: "22 Feb 2022",
-      name: "Arlene McCoy",
-      office: "Traveloka Campus",
-      status: "menunggu verifikasi",
-    },
-  ];
+  const [attendance, setAttendance] = useState<attendance[]>([]);
+  const [rowData, setRowData] = useState<attendance>({});
+  const [status, setStatus] = useState("");
+  const [statusInfo, setStatusInfo] = useState("");
+  const [defaultOffice, setDefaultOffice] = useState<office>({});
+  const [office, setOffice] = useState<office[]>([]);
+  const [officeId, setOfficeId] = useState(1);
 
   const columns = [
     {
@@ -47,33 +35,38 @@ const Attendance = () => {
       grow: 0,
     },
     {
-      name: "DATE",
-      selector: (row: any) => row.date,
-      grow: 1,
+      name: "TANGGAL",
+      selector: (row: any) => moment(row.date).format("L"),
+    },
+    {
+      name: "TANGGAL REQUEST",
+      selector: (row: any) => moment(row.request_time).format("L"),
     },
     {
       name: "KARYAWAN",
-      selector: (row: any) => row.name,
-      grow: 1,
+      selector: (row: any) => row.user.name,
     },
     {
       name: "LOKASI WFO",
       selector: (row: any) => row.office,
-      grow: 1,
     },
     {
       name: "STATUS",
-      selector: (row: any) => (
-        <span className="badge rounded-pill bg-warning">{row.status}</span>
+      selector: () => (
+        <span className="badge rounded-pill border border-warning text-warning">
+          Pending
+        </span>
       ),
-      grow: 1.5,
     },
     {
       name: "ACTION",
       selector: (row: any) => (
         <span
           className="btn btn-secondary btn-sm"
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            setRowData(row);
+            setShowModal(true);
+          }}
         >
           <BsThreeDots className="fs-4" />
         </span>
@@ -91,45 +84,126 @@ const Attendance = () => {
     },
   };
 
+  useEffect(() => {
+    fetchDataOffice();
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [activePage, officeId]);
+
+  const fetchData = async () => {
+    await axios
+      .get(`/pendingattendances?page=${activePage}&office=${officeId}`)
+      .then((res) => {
+        const { data } = res;
+        data.attendance ? setAttendance(data.attendance) : setAttendance([]);
+        const temp: number[] = [];
+        for (let i = 1; i <= data.total_page; i++) {
+          temp.push(i);
+        }
+        setTotalData(data.total_data);
+        setPage(temp);
+        setTotalPage(data.total_page);
+      })
+      .catch((err) => console.log(err));
+  };
+
+  const fetchDataOffice = async () => {
+    await axios.get("/offices").then((res) => {
+      const { data } = res;
+      const temp = data.slice(1);
+      setDefaultOffice(data[0]);
+      setOffice(temp);
+    });
+  };
+
+  const handleUpdateStatus = async () => {
+    await axios
+      .put(`/attendances/${rowData.id}`, {
+        schedule_id: rowData.schedule_id,
+        status,
+        status_info: statusInfo,
+      })
+      .then(() => {
+        fetchData();
+        Swal.fire("Good job!", "Attendance has been updated", "success");
+      })
+      .catch((err: any) => {
+        Swal.fire("I'm sorry", err.message, "error");
+      })
+      .finally(() => setShowModal(false));
+  };
+
+  const handlePage = (page: number) => {
+    setActivePage(page);
+  };
+
+  const handlePrevPage = () => {
+    const temp = activePage - 1;
+    handlePage(temp);
+  };
+
+  const handleNextPage = () => {
+    const temp = activePage + 1;
+    handlePage(temp);
+  };
+
+  const handleChangeStatus = (e: ChangeEvent<HTMLInputElement>) => {
+    setStatus(e.target.value);
+  };
+
   return (
     <div className="container mb-5">
       <p className="fs-4 mb-1">Daftar Permintaan Karyawan Work from Office</p>
-      <p>420 Karyawan</p>
-      <div className="row justify-content-end g-3">
-        <div className="col-md-3">
-          <ReactDatePicker
-            className="form-select"
-            dateFormat={"dd MMM yyyy"}
-            selectsRange={true}
-            startDate={startDate}
-            endDate={endDate}
-            onChange={(update) => {
-              setDateRange(update);
-            }}
-          />
+      <p>{totalData} Permintaan</p>
+      <div className="row justify-content-end g-3 align-items-center">
+        <div className="col-auto ms-auto pe-0">
+          <FaMapMarkerAlt />
         </div>
-        <div className="col-auto">
-          <select className="form-select">
-            <option defaultValue="1">Semua status</option>
-            <option value="2">Menunggu verifikasi</option>
-            <option value="3">Disetujui</option>
-            <option value="4">Ditolak</option>
-          </select>
-        </div>
+        {office[0] && (
+          <div className="col-auto ps-0">
+            <select
+              className="form-select border-0"
+              onChange={(e: any) => {
+                setOfficeId(Number(e.target.value));
+              }}
+            >
+              <option defaultValue="" value={defaultOffice.id}>
+                {defaultOffice.name}
+              </option>
+              {office.map((item: any) => (
+                <option key={item.id} value={item.id}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
       <div className="row justify-content-center mt-3">
         <div className="col">
-          <DataTable columns={columns} data={data} />
+          <DataTable columns={columns} data={attendance} />
         </div>
         <div className="d-flex justify-content-end mt-3">
           <Pagination>
-            <Pagination.Prev />
+            <Pagination.Prev
+              onClick={handlePrevPage}
+              disabled={activePage <= 1}
+            />
             {page.map((item: any) => (
-              <Pagination.Item key={item} active={activePage === item}>
+              <Pagination.Item
+                key={item}
+                active={activePage === item}
+                onClick={() => handlePage(item)}
+              >
                 {item}
               </Pagination.Item>
             ))}
-            <Pagination.Next />
+            <Pagination.Next
+              onClick={handleNextPage}
+              disabled={activePage >= totalPage}
+            />
           </Pagination>
         </div>
       </div>
@@ -138,20 +212,20 @@ const Attendance = () => {
           <Modal.Title>Request Work from Office</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {!isLoading ? (
+          {!isLoading && rowData.id ? (
             <>
               <div className="row justify-content-between">
                 <div className="col-4">
                   <p className="m-0">Tanggal</p>
-                  <p className="fw-bold">{moment().format("LL")}</p>
+                  <p className="fw-bold">{moment(rowData.date).format("LL")}</p>
                 </div>
                 <div className="col-4">
                   <p className="m-0">Lokasi</p>
-                  <p className="fw-bold">Traveloka Campus</p>
+                  <p className="fw-bold">{rowData.office}</p>
                 </div>
                 <div className="col-3">
                   <p className="mb-0">Kuota Terisa</p>
-                  <p className="fw-bold">3</p>
+                  <p className="fw-bold">{rowData.actual_capacity}</p>
                 </div>
                 <div className="col-12">
                   <div className="card mb-3">
@@ -159,17 +233,24 @@ const Attendance = () => {
                       <div className="row">
                         <div className="col-6">
                           <p className="m-0">Pemohon</p>
-                          <p className="fw-bold">Arlene McCoy</p>
+                          <p className="fw-bold">{rowData?.user?.name}</p>
                         </div>
                         <div className="col-6">
                           <p className="m-0">NIK</p>
-                          <p className="fw-bold">123435678</p>
+                          <p className="fw-bold">{rowData?.user?.nik}</p>
                         </div>
                         <div className="col">
-                          <div className="alert alert-info m-0">
-                            <BsCheckCircleFill className="me-2 mb-1" />
-                            <span>Sudah divaksinasi</span>
-                          </div>
+                          {rowData?.user?.vaccine_status === "Approved" ? (
+                            <div className="alert alert-info m-0">
+                              <BsCheckCircleFill className="me-2 mb-1" />
+                              <span>Sudah divaksinasi</span>
+                            </div>
+                          ) : (
+                            <div className="alert alert-danger m-0">
+                              <IoAlertCircle className="fs-5 me-2 mb-1" />
+                              <span>Vaksinasi belum lengkap</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -184,7 +265,9 @@ const Attendance = () => {
                           type="radio"
                           name="verifikasi"
                           id="setuju"
-                          value="option1"
+                          value="Approved"
+                          checked={status === "Approved"}
+                          onChange={handleChangeStatus}
                         />
                         <label className="form-check-label" htmlFor="setuju">
                           Setuju
@@ -202,7 +285,9 @@ const Attendance = () => {
                           type="radio"
                           name="verifikasi"
                           id="tolak"
-                          value="option2"
+                          value="Rejected"
+                          checked={status === "Rejected"}
+                          onChange={handleChangeStatus}
                         />
                         <label className="form-check-label" htmlFor="tolak">
                           Tolak
@@ -220,6 +305,7 @@ const Attendance = () => {
                     id="keterangan"
                     placeholder="Kuota tidak mencukupi"
                     rows={2}
+                    onChange={(e) => setStatusInfo(e.target.value)}
                   ></textarea>
                 </div>
               </div>
@@ -244,6 +330,7 @@ const Attendance = () => {
             type="button"
             className="btn btn-success rounded-3 px-4"
             disabled={isLoading}
+            onClick={handleUpdateStatus}
           >
             Konfirmasi
           </button>
