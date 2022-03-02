@@ -5,11 +5,11 @@ import 'moment/locale/id';
 import { Button, FormControl, InputGroup, Modal, ModalBody, Pagination } from "react-bootstrap";
 import Calendar from "react-calendar";
 import 'react-calendar/dist/Calendar.css';
+import Swal from "sweetalert2";
 import EmployeeCard from "../../../components/employeeCard";
 import RequestStatusLabel from "../../../components/requestStatusLabel";
 import "../user/user.module.css";
 import { FaSort, FaSyringe, FaInfoCircle } from "react-icons/fa";
-import { callbackify } from "util";
 
 const User = () => {
   const token: string | null = localStorage.getItem('token');
@@ -27,12 +27,11 @@ const User = () => {
   const [offices, setOffices] = useState<string[]>([]);
 
   const [certificates, setCertificates] = useState<string[]>(['', '', '']);
+  const [dose, setDose] = useState<number>(0);
 
-  const [date, setDate] = useState<string>(moment().format("DD"));
-  console.log(moment().format('DD'))
-
+  
   const [attendants, setAttendants] = useState<[]>([]);
-
+  
   const [isSortByRecent, setIsSortByRecent] = useState<boolean>(false);
   const [requests, setRequests] = useState<any>();
   const [totalPage, setTotalPage] = useState<number>(1);
@@ -41,91 +40,189 @@ const User = () => {
   const [showCheckInModal, setShowCheckInModal] = useState<boolean>(false);
   const [showRequestModal, setShowRequestModal] = useState<boolean>(false);
   const [showCertificateModal, setShowCertificateModal] = useState<boolean>(false);
-
+  
   const [certificateFile, setCertificateFile] = useState<any>();
   const [pcrFile, setPcrFile] = useState<any>();
 
+  const [schedules, setSchedules] = useState<any>();
+  const [scheduleId, setScheduleId] = useState<number>(0);
+  const [schedulesId, setSchedulesId] = useState<any>();
+  const [calendarDate, setCalendarDate] = useState(
+    new Date(
+      new Date().getFullYear(),
+      new Date().getMonth(),
+      new Date().getDate(),
+      23,
+      59,
+      59
+    )
+  );
+
   useEffect(() => {
     axios
-      .get('https://richap.space/profile', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-      })
-      .then((res) => {
-        const { data } = res;
-        setEmployeeName(data.name);
-        setEmployeeEmail(data.email);
-        setEmployeeImage(data.image_url);
-        setEmployeeNIK(data.nik);
-        setEmployeeOffice(data.office);
-        setEmployeeVaccineStat(data.vaccine_status);
-        setEmployeeId(data.id);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-
-    axios
-      .get('https://richap.space/offices', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-      })
-      .then((res) => {
-        const { data } = res;
-        setOffices(data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-
-    axios
-      .get('https://richap.space/mycertificates', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-      })
-      .then((res) => {
-        const { data } = res;
-        const certificateOrder: string[] = ['', '', ''];
-        data?.Certificates.map((datum: any) => {
-          const dose = datum.vaccinedose;
-          certificateOrder[dose-1] = datum.status;
-          return certificateOrder;
-        })
-        setCertificates(certificateOrder);
-      })
-      .catch(function (error) {
-        if (error.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          console.log(error.response.data);
-          console.log(error.response.status);
-          console.log(error.response.headers);
-        } else if (error.request) {
-          // The request was made but no response was received
-          // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-          // http.ClientRequest in node.js
-          console.log(error.request);
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          console.log('Error', error.message);
-        }
-        console.log(error.config);
-      });
+    .get('https://richap.space/profile', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+    })
+    .then((res) => {
+      const { data } = res;
+      setEmployeeName(data.name);
+      setEmployeeEmail(data.email);
+      setEmployeeImage(data.image_url);
+      setEmployeeNIK(data.nik);
+      setEmployeeOffice(data.office);
+      setEmployeeVaccineStat(data.vaccine_status);
+      setEmployeeId(data.id);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+    
+  axios
+  .get('https://richap.space/offices', {
+    headers: {
+        Authorization: `Bearer ${token}`
+      },
+    })
+    .then((res) => {
+      const { data } = res;
+      setOffices(data);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
   }, [employeeName]);
 
   useEffect(() => {
+    axios
+    .get('https://richap.space/mycertificates', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+    })
+    .then((res) => {
+      const { data } = res;
+      const certificateOrder: string[] = ['', '', ''];
+      data?.Certificates.map((datum: any) => {
+        const dose = datum.vaccinedose;
+        certificateOrder[dose-1] = datum.status;
+        return certificateOrder;
+      })
+      setCertificates(certificateOrder);
+    })
+    .catch(function (error) {
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.log(error.response.data);
+        console.log(error.response.status);
+        console.log(error.response.headers);
+      } else if (error.request) {
+        // The request was made but no response was received
+        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+        // http.ClientRequest in node.js
+        console.log(error.request);
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.log('Error', error.message);
+      }
+      console.log(error.config);
+    });
+  }, [certificates]);
+
+  // const handleGetMonthlySchedules = async() => {
+  //   await axios
+  //   .get(`https://richap.space/schedules?page=1&month=3&year=2022&office=1`, {
+  //     headers: {
+  //       Authorization: `Bearer ${token}`
+  //     },
+  //   })
+  //   .then((res) => {
+  //     const { data } = res;
+  //     setSchedules(data);
+  //     console.log(schedules);
+  //   })
+  //   .then(() => {
+  //     setSchedulesId(schedules?.map((schedule: any) => (
+  //       schedule.total_capacity
+  //     )));
+  //     console.log(schedulesId);
+  //   })
+  //   .catch(function (error) {
+  //     if (error.response) {
+  //       // The request was made and the server responded with a status code
+  //       // that falls out of the range of 2xx
+  //       console.log(error.response.data);
+  //       console.log(error.response.status);
+  //       console.log(error.response.headers);
+  //     } else if (error.request) {
+  //       // The request was made but no response was received
+  //       // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+  //       // http.ClientRequest in node.js
+  //       console.log(error.request);
+  //     } else {
+  //       // Something happened in setting up the request that triggered an Error
+  //       console.log('Error', error.message);
+  //     }
+  //     console.log(error.config);
+  //   });
+  // }
+  useEffect(() => {
+    axios
+    .get(`https://richap.space/schedules?page=1&month=3&year=2022&office=1`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+    })
+    .then((res) => {
+      const { data } = res;
+      setSchedules(data);
+    })
+    // .then(() => {
+    //   const scheduleIdData = schedules?.map((schedule: any) => (
+    //     schedule.total_capacity
+    //   ));
+    //   setScheduleId(scheduleIdData);
+    //   console.log(schedulesId);
+    // })
+    .catch(function (error) {
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.log(error.response.data);
+        console.log(error.response.status);
+        console.log(error.response.headers);
+      } else if (error.request) {
+        // The request was made but no response was received
+        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+        // http.ClientRequest in node.js
+        console.log(error.request);
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.log('Error', error.message);
+      }
+      console.log(error.config);
+    })
+  }, [employeeName]);
+  
+  useEffect(() => {
     handleRequestHistory(1);
-  }, [isSortByRecent])
+  }, [isSortByRecent]);
+  
+  const formatReactDate = (dateInput: Date) => {
+    const year = dateInput.getFullYear();
+    const month = dateInput.getMonth()+1;
+    const date = dateInput.getDate();
+    return `${year}${month.toString().length===1 ? `0${month}` : `${month}`}${date.toString().length===1 ? `0${date}` : `${date}`}`
+  }
 
   const handleRequestHistory = async(page: number, status?: string) => {
     var url: string;
     isSortByRecent ?
-      url = `https://richap.space/mylatestattendances?page=${page}`
-      : url = `https://richap.space/mylongestattendances?page=${page}`
-    
+    url = `https://richap.space/mylatestattendances?page=${page}`
+    : url = `https://richap.space/mylongestattendances?page=${page}`
+  
     await axios
     .get(url, {
       headers: {
@@ -156,11 +253,12 @@ const User = () => {
       console.log(error.config);
     });
   }
-
   
-  const handleShowAttendanceByDate = async(id: number) => {
+  const handleShowAttendanceByDate = async(dateInput: number) => {
+    setAttendants([]);
+    const dateToId = schedules?.find((schedule: any) => parseInt(schedule.time.substring(8,10)) === dateInput).id;
     await axios
-    .get(`https://richap.space/schedules/${id}`, {
+    .get(`https://richap.space/schedules/${dateToId}`, {
       headers: {
         Authorization: `Bearer ${token}`
       },
@@ -168,32 +266,24 @@ const User = () => {
     .then((res) => {
       const { data } = res;
       setAttendants(data.user);
+      setScheduleId(data.id);
     })
     .catch((err) => {
       console.log(err);
     });
   }
-  
-  const formatDate = (date: string) => {
-    const month = date.slice(4,7);
-    return `${date.slice(11,15)}`+
-    `${month === 'Jan' ? '01'
-    : month === 'Feb' ? '02'
-    : month === 'Mar' ? '03'
-    : month === 'Apr' ? '04'
-    : month === 'May' ? '05'
-    : month === 'Jun' ? '06'
-    : month === 'Jul' ? '07'
-    : month === 'Aug' ? '08'
-    : month === 'Sep' ? '09'
-    : month === 'Oct' ? '10'
-    : month === 'Nov' ? '11'
-    : '12'}`+
-    `${date.slice(8,10)}`;
-  }
 
   const isRequestDateValid = () => {
-    const requestDateValidity = moment(formatDate(date)) < moment()
+    const today = new Date();
+    const currentDate = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+      0o0,
+      0o0,
+      0o0
+    )
+    const requestDateValidity = calendarDate < currentDate
     ? false
     : true;
     return requestDateValidity;
@@ -206,6 +296,7 @@ const User = () => {
     setShowCheckInModal(false);
   }
   const handleCheckIn = (temperature: string) => {
+    setShowCheckInModal(false);
     const formData = new FormData();
     formData.append('id', employeeId);
     formData.append('temperature', temperature);
@@ -217,7 +308,15 @@ const User = () => {
           Authorization: `Bearer ${token}`
         },
       })
-      .then((res) => console.log(res))
+      .then((res) => {
+        console.log(res);
+        Swal.fire({
+          icon: 'success',
+          title: 'Proses check in berhasil',
+          showConfirmButton: false,
+          timer: 1500
+        })
+      })
       .catch(function (error) {
         if (error.response) {
           // The request was made and the server responded with a status code
@@ -235,6 +334,11 @@ const User = () => {
           console.log('Error', error.message);
         }
         console.log(error.config);
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Anda belum bisa check in saat ini'
+        })
       });
   }
 
@@ -246,11 +350,12 @@ const User = () => {
   }
   const handleRequest = () => {
     setShowRequestModal(false);
+    
     const formData = new FormData();
-    formData.append("schedule_id", parseInt(date.slice(8,10)).toString());
+    formData.append("schedule_id", scheduleId.toString());
     formData.append("description", 'Permohonan request kerja');
     formData.append("image", pcrFile);
-
+    
     axios
       .post('https://richap.space/attendances', formData, {
         headers: {
@@ -260,6 +365,84 @@ const User = () => {
       })
       .then((res) => {
         console.log(res);
+        Swal.fire({
+          icon: 'success',
+          title: 'Permohonan request berhasil',
+          showConfirmButton: false,
+          timer: 1500
+        })
+      })
+      .catch(function (error) {
+        if (error.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          console.log(`%c${error.response.data.message}`, "color:green");
+          
+          console.log(`%c${error.response.status}`, "color:red");
+          console.log(`%c${error.response.headers}`, "color:blue");
+          if (error.response.data.message === "request telah ada") {
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Anda telah melakukan permohonan WFO pada hari ini'
+            })
+          } else if (error.response.data.message === "user belum vaccine") {
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Lengkapi sertifikat vaksin untuk melakukan permohonan WFO'
+            })
+          } else if (error.response.data.message === "tanggal request harus lebih besar daripada tanggal hari ini") {
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Anda telah melewati batas waktu untuk permohonan di hari ini. Silakan coba hari lainnya'
+            })
+          }
+        } else if (error.request) {
+          // The request was made but no response was received
+          // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+          // http.ClientRequest in node.js
+          console.log(`%c${error.request}`, "color:pink");
+          console.log(error.request);
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          console.log('Error', `%c${error.message}`, "color:purple");
+        }
+        console.log(`error.config`);
+      });
+  }
+
+  const handleCertificateModal = (certificateIndex: number) => {
+    setShowCertificateModal(true);
+    setDose(certificateIndex+1);
+  }
+  const handleCloseCertificateModal = () => {
+    setShowCertificateModal(false);
+    setCertificateFile(null);
+  }
+  const handleCertificateUpload = (vaccineDose: number) => {
+    setShowCertificateModal(false);
+    const formData = new FormData();
+    formData.append("image", certificateFile);
+    formData.append("vaccinedose", `${vaccineDose}`);
+    formData.append("description", `vaksin ke-${vaccineDose}`);
+
+    axios
+      .post('https://richap.space/certificates', formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`
+        },
+      })
+      .then((res) => {
+        console.log(res);
+        Swal.fire({
+          icon: 'success',
+          title: 'Upload sertifikat berhasil',
+          showConfirmButton: false,
+          timer: 1500
+        })
       })
       .catch(function (error) {
         if (error.response) {
@@ -279,62 +462,6 @@ const User = () => {
         }
         console.log(error.config);
       });
-  }
-
-  const handleCertificateModal = () => {
-    setShowCertificateModal(true);
-  }
-  const handleCloseCertificateModal = () => {
-    setShowCertificateModal(false);
-  }
-  const handleCertificateUpload = () => {
-    setShowCertificateModal(false);
-    const formData = new FormData();
-    formData.append("image", certificateFile);
-    formData.append("vaccinedose", "2");
-    formData.append("description", `vaksin ke-${2}`);
-
-    // axios
-    //   .post('https://richap.space/certificates', formData, {
-    //     headers: {
-    //       "Content-Type": "multipart/form-data",
-    //       Authorization: `Bearer ${token}`
-    //     },
-    //   })
-    //   .then((res) => {
-    //     console.log(res);
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
-    axios({
-      url: 'https://richap.space/certificates',
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data'
-      },
-      data: formData
-    })
-    .then((res) => console.log(res))
-    .catch(function (error) {
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.log(error.response.data);
-        console.log(error.response.status);
-        console.log(error.response.headers);
-      } else if (error.request) {
-        // The request was made but no response was received
-        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-        // http.ClientRequest in node.js
-        console.log(error.request);
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.log('Error', error.message);
-      }
-      console.log(error.config);
-    });
   }
 
   let pages = [];
@@ -348,10 +475,11 @@ const User = () => {
 
   return (
     <div className="container">
+      {/* {handleGetMonthlySchedules} */}
       {/* Whole Page */}
       <div className="d-flex mt-2 mx-5 px-5">
         {/* Employee Greeting */}
-        <h4>Hi, {employeeName}! 👋</h4>
+        <h4 style={{textTransform: "capitalize"}}>Hi, {employeeName}! 👋</h4>
       </div>
       <div className="d-flex justify-content-center mt-2">
         {/* Kolom 1 */}
@@ -389,7 +517,7 @@ const User = () => {
                   <div className="row col-12">
                     <div className="col w-50">
                       <div className="text-muted" style={{fontSize: "0.7rem"}}>Pemohon</div>
-                      <div>{employeeName}</div>
+                      <div style={{textTransform: "capitalize"}}>{employeeName}</div>
                     </div>
                     <div className="col w-50">
                       <div className="text-muted" style={{fontSize: "0.7rem"}}>NIK</div>
@@ -409,12 +537,12 @@ const User = () => {
             </div>
           </div>
           {/* Work Request Card (Calendar + Attendance Section) */}
-          <div className="container d-flex col p-2 mr-4 mt-2" style={{border: "1px solid grey", borderRadius: "5px", width: "90%"}}>
+          <div className="container d-flex col p-2 mr-4 my-4" style={{border: "1px solid grey", borderRadius: "5px", width: "90%"}}>
             {/* Calendar Section */}
             <div className="d-flex w-50 row">
               <h6>Lokasi</h6>
               <div>
-                <select style={{width: "90%"}}>
+                <select style={{width: "90%", marginBottom: "10px"}}>
                   {offices?.map((office: any, index: number) => (
                     <option key={index}>{office.name}</option>
                   ))}    
@@ -422,13 +550,25 @@ const User = () => {
               </div>
               <div style={{width: "91%"}}>
                 <Calendar
-                  calendarType="US"
                   showFixedNumberOfWeeks={true}
                   prev2Label={null}
                   next2Label={null}
+                  tileDisabled={
+                    ({ date, view }) => view === 'month' && date.getMonth() !== new Date().getMonth()
+                  }
+                  tileContent={
+                    ({ activeStartDate, date, view }) => view === 'month' && schedules && date.getMonth() === new Date().getMonth()
+                    ? <small className="d-block text-muted" style={{fontSize: "0.7rem"}}>
+                        {schedules.find((schedule: any) => 
+                          schedule.id === date.getDate()).total_capacity}
+                      </small>
+                    : <small className="d-block text-muted" style={{fontSize: "0.7rem"}}>
+                        {"-"}
+                      </small>
+                  }
                   onClickDay={(value) => {
-                    setDate(value.toString());
-                    handleShowAttendanceByDate(parseInt(value.toString().slice(8,10)));
+                    setCalendarDate(value);
+                    handleShowAttendanceByDate(value.getDate());
                   }}
                 />
               </div>
@@ -436,21 +576,25 @@ const User = () => {
             {/* Attendance Section */}
             <div className="d-flex row" style={{margin: "0 auto", width: "calc(100% - 20px)"}}>
               <div>
-                Karyawan Work from Office
+                <strong>
+                  Karyawan Work from Office
+                </strong>
               </div>
               {attendants
-              ? <div data-bs-spy="scroll" data-bs-offset="0" className="scrollspy-example" tabIndex={0} style={{height: '290px', overflowY: 'scroll'}}>
+              ? <div data-bs-spy="scroll" data-bs-offset="0" className="scrollspy-example" tabIndex={0} style={{height: '380px', overflowY: 'scroll'}}>
                 {attendants?.map((attendant: any, index: number) => (
                   <div key={index}>
                     <EmployeeCard
                       image={attendant.image_url}
                       employee={attendant.name}
-                      wfoDate={formatDate(date)}
+                      wfoDate={formatReactDate(calendarDate)}
                       wfoLocation={attendant.office} />
                   </div>
                 ))}
               </div>
-              : <div className="d-flex align-items-center justify-content-center" style={{height: "290px"}}>Belum ada permohonan</div>
+              : <div className="d-flex align-items-center justify-content-center" style={{height: "380px"}}>
+                Belum ada permohonan
+              </div>
               }
               <div style={{marginTop: "10px"}}>
                 {isRequestDateValid()
@@ -479,9 +623,10 @@ const User = () => {
                           <div className="text-muted" style={{fontSize: "0.7rem"}}>Tanggal</div>
                           <div>
                             <strong>
-                              {date
-                                ? moment(formatDate(date)).format("Do MMMM YYYY")
-                                : moment().add('1', 'days').format("Do MMMM YYYY")}
+                              {calendarDate
+                                ? moment(formatReactDate(calendarDate)).format("Do MMMM YYYY")
+                                : moment().add('1', 'days').format("Do MMMM YYYY")
+                              }
                             </strong>
                           </div>
                         </div>
@@ -495,7 +640,7 @@ const User = () => {
                       <div className="row col-12">
                         <div className="col w-50">
                           <div className="text-muted" style={{fontSize: "0.7rem"}}>Pemohon</div>
-                          <div>{employeeName}</div>
+                          <div style={{textTransform: "capitalize"}}>{employeeName}</div>
                         </div>
                         <div className="col w-50">
                           <div className="text-muted" style={{fontSize: "0.7rem"}}>NIK</div>
@@ -503,8 +648,9 @@ const User = () => {
                         </div>
                       </div>
                     </ModalBody>
-                    <Modal.Body>
-                      <div className="row col-12">
+                    <Modal.Body style={{backgroundColor: "lightgrey"}}>
+                      <div className="col col-12">
+                      <div className="text-muted" style={{fontSize: "0.7rem"}}>Foto Bukti PCR</div>
                         <input type="file"
                           accept="image/*"
                           onChange={(e: ChangeEvent<HTMLInputElement>) => {
@@ -534,39 +680,38 @@ const User = () => {
               <div>
                 <h6>Riwayat Permohonan Work from Office (WFO)</h6>
               </div>
-              <div style={{margin: "0 auto", width: "calc(100% - 2px)"}}>
-                <table className="table table-borderless table-hover" style={{margin: "0 auto", width: "calc(100% - 2px)"}}>
-                  <thead style={{backgroundColor: "lightgrey"}}>
-                    <tr>
-                      <th scope="col" className="align-middle">No</th>
-                      <th scope="col" className="align-middle" style={{position: "relative"}}>
-                        Tanggal &nbsp; <span onClick={() => setIsSortByRecent(!isSortByRecent)} style={{position: "absolute", top: "16%"}}><FaSort /></span>
-                      </th>
-                      <th scope="col" className="align-middle">Lokasi</th>
-                      <th scope="col" className="align-middle">Status</th>
-                      <th scope="col" className="align-middle">Keterangan</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {requests?.map((request: any, index: number) => (
-                      <tr key={request.id}>
-                        <td>{index+1}</td>
-                        <td>{request.date.slice(0,10)}</td>
-                        <td>{request.office}</td>
-                        <td><RequestStatusLabel content={request.status} /></td>
-                        <td>{request.status_info}</td>
+              {!requests ?
+                <div>Anda belum pernah melakukan request</div>
+                : <div style={{margin: "0 auto", width: "calc(100% - 2px)"}}>
+                  <table className="table table-borderless table-hover" style={{margin: "0 auto", width: "calc(100% - 2px)"}}>
+                    <thead style={{backgroundColor: "lightgrey"}}>
+                      <tr>
+                        <th scope="col" className="align-middle">No</th>
+                        <th scope="col" className="align-middle" style={{position: "relative"}}>
+                          Tanggal &nbsp; <span onClick={() => setIsSortByRecent(!isSortByRecent)} style={{position: "absolute", top: "16%"}}><FaSort /></span>
+                        </th>
+                        <th scope="col" className="align-middle">Lokasi</th>
+                        <th scope="col" className="align-middle">Status</th>
+                        <th scope="col" className="align-middle">Keterangan</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {requests?.map((request: any, index: number) => (
+                        <tr key={request.id}>
+                          <td>{index+1}</td>
+                          <td>{request.date.slice(0,10)}</td>
+                          <td>{request.office}</td>
+                          <td><RequestStatusLabel content={request.status} /></td>
+                          <td>{request.status_info}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              }
               <div className="d-flex justify-content-center">
-                {totalPage === 0 ?
+                {totalPage <= 1 ?
                 <button style={{display: "none"}}></button>
-                : totalPage === 1 ?
-                <Pagination>
-                  <Pagination.Item>{1}</Pagination.Item>
-                </Pagination>
                 : <Pagination>
                   <Pagination.Prev></Pagination.Prev>
                   {pages}
@@ -579,7 +724,7 @@ const User = () => {
         </div>
 
         {/* Kolom 2 */}
-        <div className="col col-md-3 col-sm-12">
+        <div className="col col-md-3">
           {/* Profile Card */}
           <div style={{border: "1px solid grey", borderRadius: "5px"}}>
             <div className="d-flex container p-2" style={{backgroundColor: "lightgrey"}}>
@@ -587,7 +732,7 @@ const User = () => {
                 <img src={employeeImage} alt="" height="40px" width="40px" style={{borderRadius: "50%"}}/>
               </div>
               <div className="d-flex row align-items-center">
-                <div style={{fontSize: "1rem"}}>{employeeName}</div>
+                <div style={{fontSize: "1rem", textTransform: "capitalize"}}>{employeeName}</div>
                 <div className="text-muted" style={{fontSize: "0.8rem"}}>{employeeEmail}</div>
               </div>
             </div>
@@ -635,40 +780,46 @@ const User = () => {
                           Unggah Sertifikat
                         </button>
                       : <button className="btn btn-sm" style={{fontSize: "0.7rem"}}
-                          onClick={handleCertificateModal}>
+                          onClick={() => handleCertificateModal(index)}>
                           Unggah Sertifikat
                         </button>
                       }
                     </div>
-                    {/* Certificate Modal */}
-                    <div>
-                      <Modal show={showCertificateModal} onHide={handleCloseCertificateModal} centered>
-                        <Modal.Header closeButton>
-                          <Modal.Title>{`Unggah Sertifikat Vaksin ${index}`}</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>
-                          <input type="file"
-                            accept="image/*"
-                            onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                              const fileList = e.target.files;
-                              if(!fileList) return;
-                              setCertificateFile(fileList[0]);
-                            }}
-                          />
-                        </Modal.Body>
-                        <Modal.Footer>
-                          <Button variant="outline-tertiary" onClick={handleCloseCertificateModal}>
-                            Kembali
-                          </Button>
-                          <Button variant="secondary" onClick={handleCertificateUpload}>
-                            Unggah File
-                          </Button>
-                        </Modal.Footer>
-                      </Modal>
-                    </div>
                   </li>
                 ))}
               </ol>
+              {/* Certificate Modal */}
+              <div>
+                <Modal show={showCertificateModal} onHide={handleCloseCertificateModal} centered>
+                  <Modal.Header closeButton>
+                    <Modal.Title>{`Unggah Sertifikat Vaksin ${dose}`}</Modal.Title>
+                  </Modal.Header>
+                  <Modal.Body className="row">
+                    <div style={{fontSize: "0.7rem"}} className="text-muted">Foto Sertifikat Vaksin</div>
+                    <input type="file"
+                      accept="image/*"
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                        const fileList = e.target.files;
+                        if(!fileList) return;
+                        setCertificateFile(fileList[0]);
+                      }}
+                    />
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <Button variant="outline-tertiary" onClick={handleCloseCertificateModal}>
+                      Kembali
+                    </Button>
+                    {certificateFile
+                      ? <Button variant="secondary" onClick={() => handleCertificateUpload(dose)}>
+                        Unggah File
+                      </Button>
+                      : <Button variant="secondary" onClick={() => handleCertificateUpload(dose)} className="disabled">
+                        Unggah File
+                      </Button>
+                    }
+                  </Modal.Footer>
+                </Modal>
+              </div>
             </div>
             {certificates.filter(e => e === "").length === 0
             ? <div
