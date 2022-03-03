@@ -30,7 +30,7 @@ const Attendance = () => {
 
   const columns = [
     {
-      name: "NO.",
+      name: "#ID",
       selector: (row: any) => row.id,
       grow: 0,
     },
@@ -224,7 +224,7 @@ const Attendance = () => {
                   <p className="fw-bold">{rowData.office}</p>
                 </div>
                 <div className="col-3">
-                  <p className="mb-0">Kuota Terisa</p>
+                  <p className="mb-0">Kuota Tersisa</p>
                   <p className="fw-bold">{rowData.actual_capacity}</p>
                 </div>
                 <div className="col-12">

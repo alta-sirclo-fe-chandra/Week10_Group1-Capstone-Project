@@ -17,7 +17,6 @@ import { Modal, OverlayTrigger, Pagination, Tooltip } from "react-bootstrap";
 const Schedule = () => {
   const [data, setData] = useState<schedule[]>([]);
   const [date, setDate] = useState(new Date());
-  const [currentDate, setCurrentDate] = useState(new Date());
   const [currentData, setCurrentData] = useState<currentSchedule>({});
   const [totalCapacity, setTotalCapacity] = useState(0);
   const [user, setUser] = useState<user[]>([]);
@@ -52,8 +51,8 @@ const Schedule = () => {
   }, [officeId, month, year]);
 
   useEffect(() => {
-    checkTime(currentDate) >= 0 ? fetchDataAttendance() : handleReset();
-  }, [data, currentDate, officeId]);
+    checkTime(date) >= 0 ? fetchDataAttendance() : handleReset();
+  }, [data, date, officeId]);
 
   const fetchDataSchedule = async () => {
     await axios
@@ -67,7 +66,7 @@ const Schedule = () => {
 
   const fetchDataAttendance = async () => {
     setIsLoading(true);
-    const id = data[checkTime(currentDate)].id;
+    const id = data[checkTime(date)].id;
     await axios
       .get(`/schedules/${id}?page=${activePage}`)
       .then((res) => {
@@ -98,20 +97,20 @@ const Schedule = () => {
     });
   };
 
-  const checkTime = (date: any) => {
+  const checkTime = (date: Date) => {
     return data.findIndex(
       (element) =>
-        element.time === moment(date).format("YYYY-MM-DDT00:mm:ss") + "Z"
+        element.time === moment(date).format("YYYY-MM-DDT00:00:00") + "Z"
     );
   };
 
-  const handleEdit = (date: Date) => {
-    setCurrentDate(date);
+  const checkOffice = (id: number) => {
+    return office.findIndex((element) => element.id === id);
   };
 
   const handleSubmit = async () => {
     setIsLoading(true);
-    const id = data[checkTime(currentDate)].id;
+    const id = data[checkTime(date)].id;
     await axios
       .put(`/schedules/${id}`, {
         total_capacity: totalCapacity,
@@ -215,7 +214,6 @@ const Schedule = () => {
                     </p>
                   ) : null
                 }
-                onClickDay={handleEdit}
                 onActiveStartDateChange={({ action, activeStartDate }) => {
                   if (action === "next" || action === "prev") {
                     setMonth(Number(moment(activeStartDate).format("M")));
@@ -273,7 +271,7 @@ const Schedule = () => {
                     <p className="m-0 fw-bold">{item.name}</p>
                     <p className="m-0">
                       <small className="text-end">
-                        {moment(currentDate).format("LL")} @{item.office}
+                        {moment(date).format("LL")} @{item.office}
                       </small>
                     </p>
                   </div>
@@ -322,12 +320,12 @@ const Schedule = () => {
           <Modal.Title>Kuota Work from Office</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {!isLoading && data[0] && checkTime(currentDate) >= 0 ? (
+          {!isLoading && data[0] && checkTime(date) >= 0 ? (
             <>
               <div className="row">
                 <div className="col-6">
                   <p className="m-0">Tanggal</p>
-                  <p className="fw-bold">{moment(currentDate).format("LL")}</p>
+                  <p className="fw-bold">{moment(date).format("LL")}</p>
                 </div>
                 <div className="col-6">
                   <p className="m-0">Lokasi</p>
@@ -338,7 +336,7 @@ const Schedule = () => {
                   <input
                     type="number"
                     className="form-control"
-                    defaultValue={data[checkTime(currentDate)].total_capacity}
+                    defaultValue={data[checkTime(date)].total_capacity}
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
                       setTotalCapacity(Number(e.target.value))
                     }
@@ -389,7 +387,11 @@ const Schedule = () => {
               </div>
               <div className="col-6">
                 <p className="m-0">Lokasi</p>
-                <p className="fw-bold">{officeId}</p>
+                <p className="fw-bold">
+                  {officeId === 1
+                    ? defaultOffice.name
+                    : office[checkOffice(officeId)].name}
+                </p>
               </div>
               <div className="col-6">
                 <p className="mb-1">Default Kuota</p>
