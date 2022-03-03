@@ -131,43 +131,6 @@ const User = () => {
     });
   }, [certificates]);
 
-  // const handleGetMonthlySchedules = async() => {
-  //   await axios
-  //   .get(`https://richap.space/schedules?page=1&month=3&year=2022&office=1`, {
-  //     headers: {
-  //       Authorization: `Bearer ${token}`
-  //     },
-  //   })
-  //   .then((res) => {
-  //     const { data } = res;
-  //     setSchedules(data);
-  //     console.log(schedules);
-  //   })
-  //   .then(() => {
-  //     setSchedulesId(schedules?.map((schedule: any) => (
-  //       schedule.total_capacity
-  //     )));
-  //     console.log(schedulesId);
-  //   })
-  //   .catch(function (error) {
-  //     if (error.response) {
-  //       // The request was made and the server responded with a status code
-  //       // that falls out of the range of 2xx
-  //       console.log(error.response.data);
-  //       console.log(error.response.status);
-  //       console.log(error.response.headers);
-  //     } else if (error.request) {
-  //       // The request was made but no response was received
-  //       // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-  //       // http.ClientRequest in node.js
-  //       console.log(error.request);
-  //     } else {
-  //       // Something happened in setting up the request that triggered an Error
-  //       console.log('Error', error.message);
-  //     }
-  //     console.log(error.config);
-  //   });
-  // }
   useEffect(() => {
     axios
     .get(`https://richap.space/schedules?page=1&month=3&year=2022&office=1`, {
@@ -179,13 +142,6 @@ const User = () => {
       const { data } = res;
       setSchedules(data);
     })
-    // .then(() => {
-    //   const scheduleIdData = schedules?.map((schedule: any) => (
-    //     schedule.total_capacity
-    //   ));
-    //   setScheduleId(scheduleIdData);
-    //   console.log(schedulesId);
-    // })
     .catch(function (error) {
       if (error.response) {
         // The request was made and the server responded with a status code
@@ -681,7 +637,16 @@ const User = () => {
                 <h6>Riwayat Permohonan Work from Office (WFO)</h6>
               </div>
               {!requests ?
-                <div>Anda belum pernah melakukan request</div>
+                <div className="text-center pt-2">
+                  <div>
+                    Anda belum pernah melakukan request
+                  </div>
+                  <div>
+                    <button className="btn btn-tertiary" onClick={() => setIsSortByRecent(!isSortByRecent)}>
+                      Cek Ulang
+                    </button>
+                  </div>
+                </div>
                 : <div style={{margin: "0 auto", width: "calc(100% - 2px)"}}>
                   <table className="table table-borderless table-hover" style={{margin: "0 auto", width: "calc(100% - 2px)"}}>
                     <thead style={{backgroundColor: "lightgrey"}}>
