@@ -44,7 +44,9 @@ const Attendance = () => {
     },
     {
       name: "KARYAWAN",
-      selector: (row: any) => row.user.name,
+      selector: (row: any) => (
+        <span className="text-capitalize">{row.user.name}</span>
+      ),
     },
     {
       name: "LOKASI WFO",
@@ -135,20 +137,6 @@ const Attendance = () => {
       .finally(() => setShowModal(false));
   };
 
-  const handlePage = (page: number) => {
-    setActivePage(page);
-  };
-
-  const handlePrevPage = () => {
-    const temp = activePage - 1;
-    handlePage(temp);
-  };
-
-  const handleNextPage = () => {
-    const temp = activePage + 1;
-    handlePage(temp);
-  };
-
   const handleChangeStatus = (e: ChangeEvent<HTMLInputElement>) => {
     setStatus(e.target.value);
   };
@@ -188,20 +176,20 @@ const Attendance = () => {
         <div className="d-flex justify-content-end mt-3">
           <Pagination>
             <Pagination.Prev
-              onClick={handlePrevPage}
+              onClick={() => setActivePage(activePage - 1)}
               disabled={activePage <= 1}
             />
             {page.map((item: any) => (
               <Pagination.Item
                 key={item}
                 active={activePage === item}
-                onClick={() => handlePage(item)}
+                onClick={() => setActivePage(item)}
               >
                 {item}
               </Pagination.Item>
             ))}
             <Pagination.Next
-              onClick={handleNextPage}
+              onClick={() => setActivePage(activePage + 1)}
               disabled={activePage >= totalPage}
             />
           </Pagination>

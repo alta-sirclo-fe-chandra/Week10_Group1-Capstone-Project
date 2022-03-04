@@ -42,3 +42,27 @@ export interface attendance {
     request_time?: string,
     user?: user
 }
+
+export interface certificates {
+    id: number,
+    imageurl: string,
+    vaccinedose: number,
+    adminname: string,
+    status: string,
+    description: string,
+}
+export interface certificate {
+    Certificates: certificates[]
+    id?: number,
+    name?: string,
+    nik?: string,
+    status?: string,
+}
+
+export interface register {
+    name: string,
+    email: string,
+    nik: string,
+    password: string,
+    office_id: number
+}

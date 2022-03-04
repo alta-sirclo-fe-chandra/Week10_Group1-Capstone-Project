@@ -1,3 +1,4 @@
+import Footer from "./components/footer";
 import { useSelector } from "react-redux";
 import Navbar from "./components/navbar";
 import Index from "./pages";
@@ -10,6 +11,7 @@ const App = () => {
     <>
       <Navbar />
       {userInfo.role === "user" ? <User /> : <Index />}
+      <Footer />
     </>
   );
 };
