@@ -162,7 +162,7 @@ const Schedule = () => {
 
   return (
     <div className="container">
-      <h2>{moment().format("LL")}</h2>
+      <h2>{moment().format("dddd, LL")}</h2>
       <div className="row justify-content-between align-items-center">
         <div className="col-auto">
           <p className="m-0">
@@ -176,7 +176,7 @@ const Schedule = () => {
           <div className="col-auto ps-0">
             <select
               className="form-select border-0"
-              onChange={(e: any) => {
+              onChange={(e: ChangeEvent<HTMLSelectElement>) => {
                 setOfficeId(Number(e.target.value));
                 setData([]);
               }}
@@ -315,6 +315,7 @@ const Schedule = () => {
           </div>
         </div>
       </div>
+      {/* Modal Update Kuota */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Kuota Work from Office</Modal.Title>
@@ -370,6 +371,7 @@ const Schedule = () => {
           </button>
         </Modal.Footer>
       </Modal>
+      {/* Modal Create Schedule */}
       <Modal show={modalCreate} onHide={() => setModalCreate(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Buat Schedule</Modal.Title>

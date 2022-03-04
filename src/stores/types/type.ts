@@ -10,8 +10,8 @@ export interface actionIsLoggedIn {
 
 export interface userInfo {
     id: number,
-    name: string,
-    email: string,
+    authorized: boolean,
+    role: string,
 }
 
 export interface actionUserInfo {

@@ -1,15 +1,19 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import axios from "axios";
-import jwtDecode from "jwt-decode";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import App from "../App";
-import Error from "../pages/error";
-import Login from "../pages/login";
 import { reduxAction } from "../stores/actions/action";
 import { RootState } from "../stores/reducers/reducer";
 import { userInfo } from "../stores/types/type";
+import axios from "axios";
+import jwtDecode from "jwt-decode";
+import moment from "moment";
+import App from "../App";
+import Error from "../pages/error";
+import Login from "../pages/login";
+import Create from "../pages/employee/create";
+import "moment/locale/id";
+moment.locale("id");
 
 const Index = () => {
   const isLoggedIn = useSelector((state: RootState) => state.isLoggedIn);
@@ -33,6 +37,10 @@ const Index = () => {
         <Route
           path="/"
           element={isLoggedIn ? <App /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/create"
+          element={isLoggedIn ? <Create /> : <Navigate to="/login" />}
         />
         <Route path="*" element={<Error />} />
         <Route

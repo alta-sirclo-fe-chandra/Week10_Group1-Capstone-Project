@@ -12,6 +12,9 @@ import { ChangeEvent, useEffect, useState } from "react";
 import { Modal, Pagination } from "react-bootstrap";
 import { BsCheckCircleFill, BsThreeDots } from "react-icons/bs";
 import { IoAlertCircle } from "react-icons/io5";
+import { MdAddCircleOutline } from "react-icons/md";
+import { certificate } from "../types";
+import { useNavigate } from "react-router";
 
 const Certificate = () => {
   const [page, setPage] = useState([1]);
@@ -19,14 +22,18 @@ const Certificate = () => {
   const [activePage, setActivePage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [data, setData] = useState<any>([]);
+  const [data, setData] = useState<certificate[]>([]);
   const [totalData, setTotalData] = useState(0);
-  const [rowData, setRowData] = useState<any>({});
   const [certifIndex, setCertifIndex] = useState(0);
   const [status, setStatus] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [imageOpen, setImageOpen] = useState(false);
-  const pending = ["1", "2", "3"];
+  const [pending] = useState(["1", "2", "3"]);
+  const [rowData, setRowData] = useState<certificate>({
+    Certificates: [],
+  });
+
+  const navigate = useNavigate();
 
   const columns = [
     {
@@ -78,6 +85,7 @@ const Certificate = () => {
           )}
         </div>
       ),
+      grow: 1.5,
     },
     {
       name: "STATUS",
@@ -145,8 +153,9 @@ const Certificate = () => {
   };
 
   const handleUpdateStatus = async () => {
+    const id = rowData.Certificates[certifIndex].id;
     await axios
-      .put(`/certificates/${rowData.Certificates[certifIndex].id}`, {
+      .put(`/certificates/${id}`, {
         status,
       })
       .then(() => {
@@ -168,25 +177,19 @@ const Certificate = () => {
     setCertifIndex(0);
   };
 
-  const handlePage = (page: number) => {
-    setActivePage(page);
-  };
-
-  const handlePrevPage = () => {
-    const temp = activePage - 1;
-    handlePage(temp);
-  };
-
-  const handleNextPage = () => {
-    const temp = activePage + 1;
-    handlePage(temp);
-  };
-
   return (
     <div className="container mb-5">
       <p className="fs-4 mb-1">Sertifikat Vaksin Karyawan</p>
       <p>{totalData} Karyawan</p>
-      <div className="row justify-content-end">
+      <div className="row justify-content-between">
+        <div className="col-auto">
+          <button
+            className="btn btn-success d-flex align-items-center"
+            onClick={() => navigate("/create")}
+          >
+            <MdAddCircleOutline className="fs-5 me-1" /> Tambah Karyawan
+          </button>
+        </div>
         <div className="col-auto">
           <select
             className="form-select"
@@ -207,25 +210,26 @@ const Certificate = () => {
         <div className="d-flex justify-content-end mt-3">
           <Pagination>
             <Pagination.Prev
-              onClick={handlePrevPage}
+              onClick={() => setActivePage(activePage - 1)}
               disabled={activePage <= 1}
             />
             {page.map((item: any) => (
               <Pagination.Item
                 key={item}
                 active={activePage === item}
-                onClick={() => handlePage(item)}
+                onClick={() => setActivePage(item)}
               >
                 {item}
               </Pagination.Item>
             ))}
             <Pagination.Next
-              onClick={handleNextPage}
+              onClick={() => setActivePage(activePage + 1)}
               disabled={activePage >= totalPage}
             />
           </Pagination>
         </div>
       </div>
+      {/* Lightbox */}
       {imageOpen && (
         <Lightbox
           mainSrc={rowData.Certificates[certifIndex].imageurl}
@@ -235,6 +239,7 @@ const Certificate = () => {
           }}
         />
       )}
+      {/* Modal Verifikasi Vaksin */}
       <Modal show={showModal} onHide={handleCloseModal} centered>
         <Modal.Header closeButton>
           <Modal.Title>Kurasi Sertifikat Vaksin</Modal.Title>
@@ -323,7 +328,7 @@ const Certificate = () => {
                     </div>
                   </div>
                 </div>
-                {rowData.Certificates && (
+                {rowData.Certificates && rowData.Certificates[0] && (
                   <div className="col-12">
                     <div className="card mb-3">
                       <div className="card-body text-center">
@@ -331,6 +336,7 @@ const Certificate = () => {
                           src={rowData.Certificates[certifIndex].imageurl}
                           width="35%"
                           alt={rowData.name}
+                          style={{ cursor: "pointer" }}
                           onClick={() => {
                             setShowModal(false);
                             setImageOpen(true);
@@ -342,6 +348,7 @@ const Certificate = () => {
                 )}
                 {rowData.status === "Pending" &&
                   rowData.Certificates &&
+                  rowData.Certificates[0] &&
                   rowData.Certificates[certifIndex].status === "Pending" && (
                     <>
                       <div className="col-6">
@@ -411,6 +418,7 @@ const Certificate = () => {
             Cancel
           </button>
           {rowData.Certificates &&
+            rowData.Certificates[0] &&
             rowData.Certificates[certifIndex].status === "Pending" && (
               <button
                 type="button"

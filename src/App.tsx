@@ -1,3 +1,4 @@
+import Footer from "./components/footer";
 import Navbar from "./components/navbar";
 import Index from "./pages";
 
@@ -6,6 +7,7 @@ const App = () => {
     <>
       <Navbar />
       <Index />
+      <Footer />
     </>
   );
 };

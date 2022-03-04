@@ -1,17 +1,30 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { FaUserAlt } from "react-icons/fa";
-import Logo from "../assets/images/logo.svg";
+import { BiLogOut } from "react-icons/bi";
 import { useDispatch } from "react-redux";
 import { reduxAction } from "../stores/actions/action";
+import axios from "axios";
+import Logo from "../assets/images/logo.svg";
 
 const Navbar = () => {
   const dispatch = useDispatch();
-  const [name] = useState("Customer");
+  const [name, setName] = useState("");
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     dispatch(reduxAction("isLoggedIn", false));
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const fetchProfile = async () => {
+    await axios.get("/profile").then((res) => {
+      const { data } = res;
+      setName(data.name);
+    });
   };
 
   return (
@@ -57,19 +70,8 @@ const Navbar = () => {
                   aria-labelledby="dropdownMenu"
                 >
                   <li>
-                    <NavLink
-                      className="bg-transparent text-black dropdown-item"
-                      to="/"
-                    >
-                      Profile
-                    </NavLink>
-                  </li>
-                  <li>
-                    <hr className="dropdown-divider" />
-                  </li>
-                  <li>
                     <button className="dropdown-item" onClick={handleLogout}>
-                      Logout
+                      <BiLogOut className="fs-4" /> Logout
                     </button>
                   </li>
                 </ul>
