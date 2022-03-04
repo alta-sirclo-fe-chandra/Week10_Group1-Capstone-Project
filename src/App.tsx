@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useSelector } from "react-redux";
 import Navbar from "./components/navbar";
 import Index from "./pages";
-import User from "./pages/dashboard/user/user";
+import User from "./pages/dashboard/user";
+import { RootState } from "./stores/reducers/reducer";
 
 const App = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
+  const userInfo = useSelector((state: RootState) => state.userInfo);
   return (
     <>
       <Navbar />
-      {isLoggedIn ? <User /> : <Index />}
+      {userInfo.role === "user" ? <User /> : <Index />}
     </>
   );
 };
