@@ -268,7 +268,7 @@ const Schedule = () => {
                     />
                   </div>
                   <div className="col-auto">
-                    <p className="m-0 fw-bold">{item.name}</p>
+                    <p className="m-0 fw-bold text-capitalize">{item.name}</p>
                     <p className="m-0">
                       <small className="text-end">
                         {moment(date).format("LL")} @{item.office}

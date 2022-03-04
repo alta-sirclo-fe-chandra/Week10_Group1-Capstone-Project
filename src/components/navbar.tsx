@@ -54,7 +54,7 @@ const Navbar = () => {
             <li className="nav-item my-auto py-2 py-lg-0">
               <div className="dropdown">
                 <button
-                  className="btn dropdown-toggle"
+                  className="btn dropdown-toggle text-capitalize"
                   type="button"
                   id="dropdownMenu"
                   data-bs-toggle="dropdown"

@@ -44,7 +44,9 @@ const Attendance = () => {
     },
     {
       name: "KARYAWAN",
-      selector: (row: any) => row.user.name,
+      selector: (row: any) => (
+        <span className="text-capitalize">{row.user.name}</span>
+      ),
     },
     {
       name: "LOKASI WFO",
