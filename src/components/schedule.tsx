@@ -148,11 +148,6 @@ const Schedule = () => {
       });
   };
 
-  const currentCapacity = () => {
-    if (currentData.capacity) return currentData.capacity;
-    return 0;
-  };
-
   const handleReset = () => {
     setUser([]);
     setCurrentData({});
@@ -161,7 +156,7 @@ const Schedule = () => {
   };
 
   return (
-    <div className="container">
+    <div id="schedule" className="container">
       <h2>{moment().format("dddd, LL")}</h2>
       <div className="row justify-content-between align-items-center">
         <div className="col-auto">
@@ -193,8 +188,8 @@ const Schedule = () => {
           </div>
         )}
       </div>
-      <div className="row my-5 justify-content-evenly">
-        <div className="col-md-5">
+      <div className="row my-5 justify-content-between">
+        <div className="col-md-6">
           <div className="d-flex align-items-center">
             {data && (
               <Calendar
@@ -212,7 +207,9 @@ const Schedule = () => {
                         ? data[checkTime(date)].total_capacity
                         : ``}
                     </p>
-                  ) : null
+                  ) : (
+                    <p className="m-0 mx-1">-</p>
+                  )
                 }
                 onActiveStartDateChange={({ action, activeStartDate }) => {
                   if (action === "next" || action === "prev") {
@@ -251,9 +248,9 @@ const Schedule = () => {
             </div>
           </div>
         </div>
-        <div className="col-md-5">
+        <div className="col-md-6">
           <p className="fs-4">
-            Karyawan Work from Office ({currentCapacity()})
+            Karyawan Work from Office ({currentData.total_data})
           </p>
           {user && user[0] ? (
             !isLoading ? (

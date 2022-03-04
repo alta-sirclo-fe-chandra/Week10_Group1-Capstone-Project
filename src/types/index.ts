@@ -13,6 +13,7 @@ export interface currentSchedule {
     capacity?: number,
     office?: string,
     total_page?: number,
+    total_data?: number
 }
 
 export interface user {
