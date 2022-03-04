@@ -1,11 +1,14 @@
+import { useState } from "react";
 import Navbar from "./components/navbar";
 import Index from "./pages";
+import User from "./pages/dashboard/user/user";
 
 const App = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
   return (
     <>
       <Navbar />
-      <Index />
+      {isLoggedIn ? <User /> : <Index />}
     </>
   );
 };
