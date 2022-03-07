@@ -57,6 +57,8 @@ const User = () => {
       59
     )
   );
+  const [month, setMonth] = useState<number>(new Date().getMonth()+1);
+  const [year, setYear] = useState<number>(new Date().getFullYear());
 
   useEffect(() => {
     axios
@@ -122,23 +124,21 @@ const User = () => {
   useEffect(() => {
     handleRequestHistory(currentPage);
   }, [isSortByRecent]);
+  
+  useEffect(() => {
+    handleGetSchedule(month, year, targetOffice);
+  }, [month, year, targetOffice]);
 
   useEffect(() => {
-    setAttendants([]);
-    handleShowAttendanceByDate(new Date().getDate());
+    handleShowAttendanceByDate(calendarDate.getDate());
   }, [calendarDate]);
 
-  useEffect(() => {
-    handleGetSchedule(new Date().getMonth()+1, new Date().getFullYear(), targetOffice);
-  }, [targetOffice])
-
-  const handleGetSchedule = (monthInput: number, yearInput: number, officeInput: number) => {
-    console.log(`${monthInput}, ${yearInput}, ${officeInput}`);
-    axios
+  const handleGetSchedule = async (monthInput: number, yearInput: number, officeInput: number) => {
+    await axios
     .get(`/schedules?page=1&month=${monthInput}&year=${yearInput}&office=${officeInput}`)
     .then((res) => {
       const { data } = res;
-      setSchedules(data);
+      data !== null ? setSchedules(data) : setSchedules([]);
     })
     .catch(function (error) {
       if (error.response) {
@@ -204,19 +204,31 @@ const User = () => {
     });
   }
   
-  const handleShowAttendanceByDate = async(dateInput: number) => {
-    setAttendants([]);
+  const handleShowAttendanceByDate = async (dateInput: number) => {
     const dateToId = schedules?.find((schedule: any) => parseInt(schedule.time.substring(8,10)) === dateInput).id;
-    await axios
-    .get(`/schedules/${dateToId}`)
-    .then((res) => {
-      const { data } = res;
-      setAttendants(data.user);
-      setScheduleId(data.id);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+    if(dateToId) {
+      await axios
+      .get(`/schedules/${dateToId}`)
+      .then((res) => {
+        const { data } = res;
+        data !== null ? setAttendants(data.user) : setAttendants([]);
+        setScheduleId(data.id);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    } else {
+      await axios
+      .get(`/schedules/${new Date().getDate()}`)
+      .then((res) => {
+        const { data } = res;
+        data !== null ? setAttendants(data.user) : setAttendants([]);
+        setScheduleId(data.id);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    }
   }
 
   const isRequestDateValid = () => {
@@ -457,6 +469,14 @@ const User = () => {
       });
   }
 
+  const scheduleDateToIndex = (dateInput: Date) => {
+    const index = schedules?.findIndex(
+      (schedule: any) =>
+        schedule.time === moment(formatReactDate(dateInput, false)).format("YYYY-MM-DDT00:00:00") + "Z"
+    );
+    return schedules[index]?.total_capacity || `-`;
+  };
+
   let pages = [];
   for (let number = 1; number <= totalPage; number++) {
     pages.push(
@@ -556,7 +576,6 @@ const User = () => {
                   style={{width: "90%", marginBottom: "10px"}}
                   onChange={(e) => {
                     setTargetOffice(parseInt(e.target.value));
-                    setSchedules([]);
                   }}
                   value={targetOffice}>
                   {offices?.map((office: any, index: number) => (
@@ -565,25 +584,34 @@ const User = () => {
                 </select>
               </div>
               <div style={{width: "91%"}}>
-                <Calendar
+                {schedules && <Calendar
+                  className="rounded"
                   showFixedNumberOfWeeks={true}
                   prev2Label={null}
                   next2Label={null}
+                  value={new Date()}
+                  tileDisabled={({ activeStartDate, view, date }) =>
+                    view === "month" && date.getMonth()+1 !== activeStartDate.getMonth()+1
+                  }
                   tileContent={
-                    ({ activeStartDate, date, view }) => view === 'month' && schedules && date.getMonth() === new Date().getMonth()
+                    ({ activeStartDate, date, view }) => view === 'month' && date.getMonth()+1 === month
                     ? <small className="d-block text-muted" style={{fontSize: "0.7rem"}}>
-                        {schedules?.find((schedule: any) => 
-                          schedule.id === date.getDate()).total_capacity}
+                        {scheduleDateToIndex(date)}
                       </small>
                     : <small className="d-block text-muted" style={{fontSize: "0.7rem"}}>
                         {"-"}
                       </small>
                   }
+                  onActiveStartDateChange={({ action, activeStartDate }) => {
+                    if (action === "next" || action === "prev") {
+                      setMonth(Number(moment(activeStartDate).format("M")));
+                      setYear(Number(moment(activeStartDate).format("YYYY")));
+                    }
+                  }}
                   onClickDay={(value) => {
                     setCalendarDate(value);
-                    handleShowAttendanceByDate(value.getDate());
                   }}
-                />
+                />}
               </div>
             </div>
             {/* Attendance Section */}
