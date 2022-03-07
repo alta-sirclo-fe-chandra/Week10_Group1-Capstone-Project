@@ -9,10 +9,10 @@ import "react-image-lightbox/style.css";
 import DataTable from "react-data-table-component";
 import "react-datepicker/dist/react-datepicker.css";
 import { ChangeEvent, useEffect, useState } from "react";
-import { Modal, Pagination } from "react-bootstrap";
+import { Modal, OverlayTrigger, Pagination, Tooltip } from "react-bootstrap";
 import { BsCheckCircleFill, BsThreeDots } from "react-icons/bs";
 import { IoAlertCircle } from "react-icons/io5";
-import { MdAddCircleOutline } from "react-icons/md";
+import { AiOutlinePlus } from "react-icons/ai";
 import { certificate } from "../types";
 import { useNavigate } from "react-router";
 
@@ -179,12 +179,16 @@ const Certificate = () => {
       <p>{totalData} Karyawan</p>
       <div className="row justify-content-between">
         <div className="col-auto">
-          <button
-            className="btn btn-success d-flex align-items-center"
-            onClick={() => navigate("/create")}
+          <OverlayTrigger
+            overlay={<Tooltip id="tooltip-disabled">Tambah Karyawan</Tooltip>}
           >
-            <MdAddCircleOutline className="fs-5 me-1" /> Tambah Karyawan
-          </button>
+            <button
+              className="btn btn-success d-flex align-items-center"
+              onClick={() => navigate("/create")}
+            >
+              <AiOutlinePlus className="fs-5" />
+            </button>
+          </OverlayTrigger>
         </div>
         <div className="col-auto">
           <select

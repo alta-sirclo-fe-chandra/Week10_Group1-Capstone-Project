@@ -67,3 +67,18 @@ export interface register {
     password: string,
     office_id: number
 }
+
+export interface check {
+    id?: number,
+    name?: string,
+    nik?: string,
+    vaccinestatus?: string,
+    CheckData?: {
+        id?: number,
+        scheduledate?: string,
+        checkin?: string,
+        checkout?: string,
+        checktemperature?: number,
+        checkstatus?: string
+    }
+}

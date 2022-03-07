@@ -52,7 +52,7 @@ const Navbar = () => {
         </button>
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
-            <li className="nav-item my-auto py-2 py-lg-0">
+            <li className="nav-item ms-auto my-auto py-2 py-lg-0">
               <div className="dropdown">
                 <button
                   className="btn dropdown-toggle text-capitalize"

@@ -7,7 +7,7 @@ import Swal from "sweetalert2";
 import Avatar from "react-avatar";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { currentSchedule, office, schedule, user } from "../types";
+import { check, currentSchedule, office, schedule, user } from "../types";
 import { FaMapMarkerAlt, FaUsersSlash } from "react-icons/fa";
 import { BsCalendar2PlusFill, BsFillClockFill } from "react-icons/bs";
 import { RiErrorWarningFill } from "react-icons/ri";
@@ -32,6 +32,9 @@ const Schedule = () => {
   const [defaultCapacity, setDefaultCapacity] = useState(50);
   const [month, setMonth] = useState(Number(moment().format("M")));
   const [year, setYear] = useState(Number(moment().format("YYYY")));
+  const [check, setCheck] = useState<check[]>([]);
+  const [modalCheck, setModalCheck] = useState(false);
+  const [currentCheck, setCurrentCheck] = useState<check>({});
 
   const defaultOptions = {
     loop: true,
@@ -86,6 +89,14 @@ const Schedule = () => {
       .finally(() => {
         setIsLoading(false);
       });
+
+    await axios
+      .get(`/checkschedule/${id}`)
+      .then((res) => {
+        const { data } = res;
+        setCheck(data.UsersCheck);
+      })
+      .catch((err) => console.log(err));
   };
 
   const fetchDataOffice = async () => {
@@ -106,6 +117,10 @@ const Schedule = () => {
 
   const checkOffice = (id: number) => {
     return office.findIndex((element) => element.id === id);
+  };
+
+  const checkAttendance = (id: number) => {
+    return check.findIndex((element: any) => element.id === id);
   };
 
   const handleSubmit = async () => {
@@ -156,19 +171,18 @@ const Schedule = () => {
   };
 
   return (
-    <div id="schedule" className="container">
+    <div id="schedule" className="container mt-5 mt-lg-4">
       <h2>{moment().format("dddd, LL")}</h2>
       <div className="row justify-content-between align-items-center">
-        <div className="col-auto">
+        <div className="col-12 col-md-auto">
           <p className="m-0">
-            <BsFillClockFill className="me-2 mb-1" /> {moment().format("LT")}
+            <BsFillClockFill className="me-2 mb-1" /> {moment().format("LT")}{" "}
+            WIB
           </p>
         </div>
-        <div className="col-auto ms-auto pe-0">
-          <FaMapMarkerAlt />
-        </div>
         {office[0] && (
-          <div className="col-auto ps-0">
+          <div className="col-auto d-flex align-items-center">
+            <FaMapMarkerAlt />
             <select
               className="form-select border-0"
               onChange={(e: ChangeEvent<HTMLSelectElement>) => {
@@ -265,7 +279,48 @@ const Schedule = () => {
                     />
                   </div>
                   <div className="col-auto">
-                    <p className="m-0 fw-bold text-capitalize">{item.name}</p>
+                    <p className="m-0 fw-bold text-capitalize">
+                      {item.name}
+                      {check &&
+                        check[checkAttendance(item.id)]?.CheckData?.checkin &&
+                        !check[checkAttendance(item.id)]?.CheckData
+                          ?.checkout && (
+                          <OverlayTrigger
+                            overlay={<Tooltip id="tooltip">Checked In</Tooltip>}
+                          >
+                            <span
+                              className="position-absolute m-1 rounded-circle p-2 bg-success"
+                              style={{ cursor: "pointer" }}
+                              onClick={() => {
+                                setCurrentCheck(
+                                  check[checkAttendance(item.id)]
+                                );
+                                setModalCheck(true);
+                              }}
+                            ></span>
+                          </OverlayTrigger>
+                        )}
+                      {check &&
+                        check[checkAttendance(item.id)]?.CheckData
+                          ?.checkout && (
+                          <OverlayTrigger
+                            overlay={
+                              <Tooltip id="tooltip">Checked Out</Tooltip>
+                            }
+                          >
+                            <span
+                              className="position-absolute m-1 rounded-circle p-2 bg-danger"
+                              style={{ cursor: "pointer" }}
+                              onClick={() => {
+                                setCurrentCheck(
+                                  check[checkAttendance(item.id)]
+                                );
+                                setModalCheck(true);
+                              }}
+                            ></span>
+                          </OverlayTrigger>
+                        )}
+                    </p>
                     <p className="m-0">
                       <small className="text-end">
                         {moment(date).format("LL")} @{item.office}
@@ -419,6 +474,62 @@ const Schedule = () => {
             onClick={() => handleCreateSchedule()}
           >
             Buat Schedule
+          </button>
+        </Modal.Footer>
+      </Modal>
+      {/* Modal Check In/Out */}
+      <Modal show={modalCheck} onHide={() => setModalCheck(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Detail Check In</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <>
+            <div className="row">
+              <div className="col-6">
+                <p className="m-0">Nama</p>
+                <p className="fw-bold text-capitalize">{currentCheck.name}</p>
+              </div>
+              <div className="col-6">
+                <p className="m-0">NIK</p>
+                <p className="fw-bold">{currentCheck.nik}</p>
+              </div>
+              <div className="col-6">
+                <p className="m-0">Tanggal</p>
+                <p className="fw-bold text-capitalize">
+                  {moment(currentCheck?.CheckData?.scheduledate).format("LL")}
+                </p>
+              </div>
+              <div className="col-6">
+                <p className="m-0">Suhu Tubuh</p>
+                <p className="fw-bold text-capitalize">
+                  {currentCheck?.CheckData?.checktemperature}
+                </p>
+              </div>
+              <div className="col-6">
+                <p className="m-0">Check In</p>
+                <p className="fw-bold text-capitalize">
+                  {moment(currentCheck?.CheckData?.checkin).format("LT")}
+                </p>
+              </div>
+              <div className="col-6">
+                <p className="m-0">Check Out</p>
+                <p className="fw-bold text-capitalize">
+                  {currentCheck?.CheckData?.checkout
+                    ? moment(currentCheck.CheckData.checkout).format("LT")
+                    : `-`}
+                </p>
+              </div>
+            </div>
+          </>
+        </Modal.Body>
+        <Modal.Footer>
+          <button
+            type="button"
+            className="btn btn-success rounded-3"
+            data-bs-dismiss="modal"
+            onClick={() => setModalCheck(false)}
+          >
+            Oke
           </button>
         </Modal.Footer>
       </Modal>
