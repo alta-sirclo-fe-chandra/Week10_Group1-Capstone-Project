@@ -70,30 +70,30 @@ const User = () => {
 
   useEffect(() => {
     axios
-      .get("/profile")
-      .then((res) => {
-        const { data } = res;
-        setEmployeeName(data.name);
-        setEmployeeEmail(data.email);
-        setEmployeeImage(data.image_url);
-        setEmployeeNIK(data.nik);
-        setEmployeeOffice(data.office);
-        // setEmployeeVaccineStat(data.vaccine_status);
-        // setEmployeeId(data.id);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-
-    axios
-      .get("/offices")
-      .then((res) => {
-        const { data } = res;
-        setOffices(data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    .get('/profile')
+    .then((res) => {
+      const { data } = res;
+      setEmployeeName(data.name);
+      setEmployeeEmail(data.email);
+      setEmployeeImage(data.image_url);
+      setEmployeeNIK(data.nik);
+      setEmployeeOffice(data.office);
+      // setEmployeeVaccineStat(data.vaccine_status);
+      // setEmployeeId(data.id);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+    
+  axios
+  .get('/offices')
+    .then((res) => {
+      const { data } = res;
+      setOffices(data);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
   }, [employeeName]);
 
   useEffect(() => {
