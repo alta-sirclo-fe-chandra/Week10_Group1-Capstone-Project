@@ -17,8 +17,8 @@ const User = () => {
   const [employeeImage, setEmployeeImage] = useState<string>('');
   const [employeeNIK, setEmployeeNIK] = useState<string>('');
   const [employeeOffice, setEmployeeOffice] = useState<string>('');
-  const [employeeId, setEmployeeId] = useState<string>('');
-  const [employeeVaccineStat, setEmployeeVaccineStat] = useState<string>('');
+  // const [employeeId, setEmployeeId] = useState<string>('');
+  // const [employeeVaccineStat, setEmployeeVaccineStat] = useState<string>('');
 
   const [temperature, setTemperature] = useState<string>('');
 
@@ -70,8 +70,8 @@ const User = () => {
       setEmployeeImage(data.image_url);
       setEmployeeNIK(data.nik);
       setEmployeeOffice(data.office);
-      setEmployeeVaccineStat(data.vaccine_status);
-      setEmployeeId(data.id);
+      // setEmployeeVaccineStat(data.vaccine_status);
+      // setEmployeeId(data.id);
     })
     .catch((err) => {
       console.log(err);
