@@ -8,8 +8,12 @@ import 'react-calendar/dist/Calendar.css';
 import Swal from "sweetalert2";
 import EmployeeCard from "../../components/employeeCard";
 import RequestStatusLabel from "../../components/requestStatusLabel";
-import "../../assets/css/user.module.css";
-import { FaSyringe, FaInfoCircle, FaHandPointer } from "react-icons/fa";
+import style from "../../assets/css/user.module.css";
+import { 
+  FaSyringe, 
+  FaInfoCircle, 
+  FaHandPointer,
+} from "react-icons/fa";
 
 const User = () => {
   const [employeeName, setEmployeeName] = useState<string>('');
@@ -39,6 +43,7 @@ const User = () => {
   const [isCheckedOut, setIsCheckedOut] = useState<boolean>(false);
   
   const [showCheckInModal, setShowCheckInModal] = useState<boolean>(false);
+  const [showCheckOutModal, setShowCheckOutModal] = useState<boolean>(false);
   const [showRequestModal, setShowRequestModal] = useState<boolean>(false);
   const [showCertificateModal, setShowCertificateModal] = useState<boolean>(false);
   
@@ -119,10 +124,11 @@ const User = () => {
       }
       console.log(error.config);
     });
-  }, [certificates]);
+  }, []);
   
   useEffect(() => {
     handleRequestHistory(currentPage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSortByRecent]);
   
   useEffect(() => {
@@ -131,6 +137,7 @@ const User = () => {
 
   useEffect(() => {
     handleShowAttendanceByDate(calendarDate.getDate());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [calendarDate]);
 
   const handleGetSchedule = async (monthInput: number, yearInput: number, officeInput: number) => {
@@ -316,6 +323,13 @@ const User = () => {
         }
       });
   }
+
+  const handleCheckOutModal = () => {
+    setShowCheckOutModal(true);
+  }
+  const handleCloseCheckOutModal = () => {
+    setShowCheckOutModal(false);
+  }
   const handleCheckOut = () => {
     const formData = new FormData();
     const today = formatReactDate(new Date(), true);
@@ -431,7 +445,7 @@ const User = () => {
     setShowCertificateModal(false);
     const formData = new FormData();
     formData.append("image", certificateFile);
-    formData.append("vaccinedose", `${vaccineDose}`);
+    formData.append("vaccine_dose", `${vaccineDose}`);
     formData.append("description", `vaksin ke-${vaccineDose}`);
 
     axios
@@ -510,8 +524,7 @@ const User = () => {
                   Check In
                 </button>
                 : checkInStatus() === -1
-                  ? <button className="btn btn-secondary disabled"
-                    onClick={handleCheckInModal}>
+                  ? <button className="btn btn-secondary disabled">
                     Check In
                   </button>
                   : isCheckedOut
@@ -519,7 +532,7 @@ const User = () => {
                       Check Out
                     </button>
                     : <button className="btn btn-secondary"
-                      onClick={handleCheckOut}>
+                      onClick={handleCheckOutModal}>
                       Check Out
                     </button>
               }
@@ -566,6 +579,29 @@ const User = () => {
               </Modal>
             </div>
           </div>
+          {/* CheckOut Modal */}
+            <div>
+              <Modal show={showCheckOutModal} onHide={handleCloseCheckOutModal} size="sm" centered>
+                <Modal.Header closeButton>
+                  <Modal.Title>Check Out</Modal.Title>
+                </Modal.Header>
+                <ModalBody>
+                  <div className="row col-12">
+                    <div className="col">
+                      Apakah anda ingin check out?
+                    </div>
+                  </div>
+                </ModalBody>
+                <Modal.Footer>
+                  <Button variant="outline-tertiary" onClick={handleCloseCheckOutModal}>
+                    Tidak
+                  </Button>
+                  <Button variant="secondary" onClick={() => handleCheckOut}>
+                    Ya, konfirmasi
+                  </Button>
+                </Modal.Footer>
+              </Modal>
+            </div>
           {/* Work Request Card (Calendar + Attendance Section) */}
           <div className="container d-flex col p-2 mr-4 my-4" style={{borderRadius: "5px", width: "90%"}}>
             {/* Calendar Section */}
@@ -847,31 +883,53 @@ const User = () => {
             <div>
               <ol>
                 {certificates?.map((certificate: string, index: number) => (
-                  <li key={index}
-                    className="d-flex container justify-content-between pb-1">
+                  certificate === "Approved"
+                  ? <li key={index} className={style.green}>
                     <div className="col">
                       <div>
                         {`Vaksin ${index+1}`}
                       </div>
                       <div className="text-muted" style={{fontSize: '0.7rem'}}>
-                        {certificate === "Approved" ? 
-                          'Terverifikasi'
-                          : certificate === "Pending" ?
-                          'Menunggu Verifikasi'
-                          : 'Belum Diunggah'
-                        }
+                        Terverifikasi
                       </div>
                     </div>
                     <div className="d-flex align-items-center text-muted">
-                      {certificate !== ""
-                      ? <button className="btn btn-sm disabled" style={{fontSize: "0.7rem"}}>
-                          Unggah Sertifikat
-                        </button>
-                      : <button className="btn btn-sm" style={{fontSize: "0.7rem"}}
-                          onClick={() => handleCertificateModal(index)}>
-                          Unggah Sertifikat
-                        </button>
-                      }
+                      <button className="btn btn-sm disabled" style={{fontSize: "0.7rem"}}>
+                        Unggah Sertifikat
+                      </button>
+                    </div>
+                  </li>
+                  : certificate === "Pending"
+                  ? <li key={index} className={style.blue}>
+                    <div className="col">
+                      <div>
+                        {`Vaksin ${index+1}`}
+                      </div>
+                      <div className="text-muted" style={{fontSize: '0.7rem'}}>
+                        Menunggu Verifikasi
+                      </div>
+                    </div>
+                    <div className="d-flex align-items-center text-muted">
+                      <button className="btn btn-sm disabled" style={{fontSize: "0.7rem"}}>
+                        Unggah Sertifikat
+                      </button>
+                    </div>
+                  </li>
+                  : <li key={index} className={style.red}>
+                    <div className="col">
+                      <div>
+                        {`Vaksin ${index+1}`}
+                      </div>
+                      <div className="text-muted" style={{fontSize: '0.7rem'}}>
+                        Menunggu Verifikasi
+                      </div>
+                    </div>
+                    <div className="d-flex align-items-center text-muted">
+                      <button className="btn btn-sm" style={{fontSize: "0.7rem"}}
+                        onClick={() => handleCertificateModal(index)}
+                      >
+                        Unggah Sertifikat
+                      </button>
                     </div>
                   </li>
                 ))}
