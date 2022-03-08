@@ -17,8 +17,8 @@ const User = () => {
   const [employeeImage, setEmployeeImage] = useState<string>('');
   const [employeeNIK, setEmployeeNIK] = useState<string>('');
   const [employeeOffice, setEmployeeOffice] = useState<string>('');
-  const [employeeId, setEmployeeId] = useState<string>('');
-  const [employeeVaccineStat, setEmployeeVaccineStat] = useState<string>('');
+  // const [employeeId, setEmployeeId] = useState<string>('');
+  // const [employeeVaccineStat, setEmployeeVaccineStat] = useState<string>('');
 
   const [temperature, setTemperature] = useState<string>('');
 
