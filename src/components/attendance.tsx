@@ -7,11 +7,12 @@ import animationData from "../assets/lotties/loading-spinner.json";
 import DataTable from "react-data-table-component";
 import "react-datepicker/dist/react-datepicker.css";
 import { ChangeEvent, useEffect, useState } from "react";
-import { Modal, Pagination } from "react-bootstrap";
+import { Modal, OverlayTrigger, Pagination, Tooltip } from "react-bootstrap";
 import { BsCheckCircleFill, BsThreeDots } from "react-icons/bs";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { IoAlertCircle } from "react-icons/io5";
 import { attendance, office } from "../types";
+import Lightbox from "react-image-lightbox";
 
 const Attendance = () => {
   const [page, setPage] = useState([1]);
@@ -27,6 +28,7 @@ const Attendance = () => {
   const [defaultOffice, setDefaultOffice] = useState<office>({});
   const [office, setOffice] = useState<office[]>([]);
   const [officeId, setOfficeId] = useState(1);
+  const [imageOpen, setImageOpen] = useState(false);
 
   const columns = [
     {
@@ -35,12 +37,12 @@ const Attendance = () => {
       grow: 0,
     },
     {
-      name: "TANGGAL",
-      selector: (row: any) => moment(row.date).format("L"),
-    },
-    {
       name: "TANGGAL REQUEST",
       selector: (row: any) => moment(row.request_time).format("L"),
+    },
+    {
+      name: "TANGGAL WFO",
+      selector: (row: any) => moment(row.date).format("L"),
     },
     {
       name: "KARYAWAN",
@@ -51,14 +53,6 @@ const Attendance = () => {
     {
       name: "LOKASI WFO",
       selector: (row: any) => row.office,
-    },
-    {
-      name: "STATUS",
-      selector: () => (
-        <span className="badge rounded-pill border border-warning text-warning">
-          Pending
-        </span>
-      ),
     },
     {
       name: "ACTION",
@@ -73,7 +67,7 @@ const Attendance = () => {
           <BsThreeDots className="fs-4" />
         </span>
       ),
-      grow: 0.5,
+      grow: 0,
     },
   ];
 
@@ -142,7 +136,7 @@ const Attendance = () => {
   };
 
   return (
-    <div className="container mb-5">
+    <div id="attendance" className="container mb-5">
       <p className="fs-4 mb-1">Daftar Permintaan Karyawan Work from Office</p>
       <p>{totalData} Permintaan</p>
       <div className="row justify-content-end g-3 align-items-center">
@@ -195,6 +189,17 @@ const Attendance = () => {
           </Pagination>
         </div>
       </div>
+      {/* Lightbox */}
+      {imageOpen && rowData.image_url && (
+        <Lightbox
+          mainSrc={rowData.image_url}
+          onCloseRequest={() => {
+            setShowModal(true);
+            setImageOpen(false);
+          }}
+        />
+      )}
+      {/* Modal Request WFO */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Request Work from Office</Modal.Title>
@@ -221,7 +226,9 @@ const Attendance = () => {
                       <div className="row">
                         <div className="col-6">
                           <p className="m-0">Pemohon</p>
-                          <p className="fw-bold">{rowData?.user?.name}</p>
+                          <p className="fw-bold text-capitalize">
+                            {rowData?.user?.name}
+                          </p>
                         </div>
                         <div className="col-6">
                           <p className="m-0">NIK</p>
@@ -244,6 +251,32 @@ const Attendance = () => {
                     </div>
                   </div>
                 </div>
+                {rowData.image_url && (
+                  <div className="col-12">
+                    <div className="card mb-3">
+                      <div className="card-body text-center">
+                        <OverlayTrigger
+                          trigger={["hover", "click"]}
+                          placement="left"
+                          overlay={
+                            <Tooltip id="tooltip-disabled">PCR Test</Tooltip>
+                          }
+                        >
+                          <img
+                            src={rowData.image_url}
+                            width="35%"
+                            alt={rowData.image_url}
+                            style={{ cursor: "pointer" }}
+                            onClick={() => {
+                              setShowModal(false);
+                              setImageOpen(true);
+                            }}
+                          />
+                        </OverlayTrigger>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div className="col-6">
                   <div className="card">
                     <div className="card-body py-2">

@@ -9,10 +9,10 @@ import "react-image-lightbox/style.css";
 import DataTable from "react-data-table-component";
 import "react-datepicker/dist/react-datepicker.css";
 import { ChangeEvent, useEffect, useState } from "react";
-import { Modal, Pagination } from "react-bootstrap";
+import { Modal, OverlayTrigger, Pagination, Tooltip } from "react-bootstrap";
 import { BsCheckCircleFill, BsThreeDots } from "react-icons/bs";
 import { IoAlertCircle } from "react-icons/io5";
-import { MdAddCircleOutline } from "react-icons/md";
+import { AiOutlinePlus } from "react-icons/ai";
 import { certificate } from "../types";
 import { useNavigate } from "react-router";
 
@@ -28,12 +28,19 @@ const Certificate = () => {
   const [status, setStatus] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [imageOpen, setImageOpen] = useState(false);
-  const [pending] = useState(["1", "2", "3"]);
   const [rowData, setRowData] = useState<certificate>({
     Certificates: [],
   });
 
   const navigate = useNavigate();
+
+  const customStyles = {
+    rows: {
+      style: {
+        textTransform: "capitalize",
+      },
+    },
+  };
 
   const columns = [
     {
@@ -50,19 +57,19 @@ const Certificate = () => {
       selector: (row: any) => (
         <div className="d-flex">
           {row.Certificates ? (
-            row.Certificates.map((item: any, index: number) =>
+            row.Certificates.map((item: any) =>
               item.status === "Approved" ? (
                 <BsCheckCircleFill
-                  key={index}
+                  key={item.vaccinedose}
                   size="33"
                   color="#adb5bd"
                   className="me-2"
                 />
               ) : (
                 <Avatar
-                  key={index}
+                  key={item.vaccinedose}
                   className="me-2"
-                  value={`${index + 1}`}
+                  value={`${item.vaccinedose}`}
                   size="33"
                   round={true}
                   color="#adb5bd"
@@ -70,18 +77,7 @@ const Certificate = () => {
               )
             )
           ) : (
-            <>
-              {pending.map((item: string) => (
-                <Avatar
-                  key={item}
-                  className="me-2"
-                  value={item}
-                  size="33"
-                  round={true}
-                  color="#adb5bd"
-                />
-              ))}
-            </>
+            <></>
           )}
         </div>
       ),
@@ -178,17 +174,21 @@ const Certificate = () => {
   };
 
   return (
-    <div className="container mb-5">
+    <div id="certificate" className="container mb-5">
       <p className="fs-4 mb-1">Sertifikat Vaksin Karyawan</p>
       <p>{totalData} Karyawan</p>
       <div className="row justify-content-between">
         <div className="col-auto">
-          <button
-            className="btn btn-success d-flex align-items-center"
-            onClick={() => navigate("/create")}
+          <OverlayTrigger
+            overlay={<Tooltip id="tooltip-disabled">Tambah Karyawan</Tooltip>}
           >
-            <MdAddCircleOutline className="fs-5 me-1" /> Tambah Karyawan
-          </button>
+            <button
+              className="btn btn-success d-flex align-items-center"
+              onClick={() => navigate("/create")}
+            >
+              <AiOutlinePlus className="fs-5" />
+            </button>
+          </OverlayTrigger>
         </div>
         <div className="col-auto">
           <select
@@ -205,7 +205,11 @@ const Certificate = () => {
       </div>
       <div className="row justify-content-center mt-3">
         <div className="col">
-          <DataTable columns={columns} data={data} />
+          <DataTable
+            columns={columns}
+            data={data}
+            customStyles={customStyles}
+          />
         </div>
         <div className="d-flex justify-content-end mt-3">
           <Pagination>
@@ -250,46 +254,29 @@ const Certificate = () => {
               <div className="row justify-content-between">
                 <div className="col-12 d-flex align-items-center mb-3">
                   <p className="m-0 me-3">Sertifikat Vaksin</p>
-                  {rowData.Certificates
-                    ? rowData.Certificates.map((item: any, index: number) =>
-                        item.status === "Approved" ? (
-                          <button
-                            key={index}
-                            className="btn"
-                            onClick={() => setCertifIndex(index)}
-                          >
-                            <BsCheckCircleFill
-                              size="33"
-                              color={`${
-                                index === certifIndex ? "#6C757D" : "#adb5bd"
-                              }`}
-                            />
-                          </button>
-                        ) : (
-                          <button
-                            key={index}
-                            className="btn"
-                            onClick={() => setCertifIndex(index)}
-                          >
-                            <Avatar
-                              value={`${index + 1}`}
-                              size="33"
-                              round={true}
-                              color={`${
-                                index === certifIndex ? "#6C757D" : "#adb5bd"
-                              }`}
-                            />
-                          </button>
-                        )
-                      )
-                    : pending.map((item: string, index: number) => (
+                  {rowData.Certificates ? (
+                    rowData.Certificates.map((item: any, index: number) =>
+                      item.status === "Approved" ? (
+                        <button
+                          key={index}
+                          className="btn"
+                          onClick={() => setCertifIndex(index)}
+                        >
+                          <BsCheckCircleFill
+                            size="33"
+                            color={`${
+                              index === certifIndex ? "#6C757D" : "#adb5bd"
+                            }`}
+                          />
+                        </button>
+                      ) : (
                         <button
                           key={index}
                           className="btn"
                           onClick={() => setCertifIndex(index)}
                         >
                           <Avatar
-                            value={item}
+                            value={`${item.vaccinedose}`}
                             size="33"
                             round={true}
                             color={`${
@@ -297,7 +284,11 @@ const Certificate = () => {
                             }`}
                           />
                         </button>
-                      ))}
+                      )
+                    )
+                  ) : (
+                    <></>
+                  )}
                 </div>
                 <div className="col-12">
                   <div className="card mb-3">
@@ -305,7 +296,9 @@ const Certificate = () => {
                       <div className="row">
                         <div className="col-6">
                           <p className="m-0">Pemohon</p>
-                          <p className="fw-bold">{rowData.name}</p>
+                          <p className="fw-bold text-capitalize">
+                            {rowData.name}
+                          </p>
                         </div>
                         <div className="col-6">
                           <p className="m-0">NIK</p>

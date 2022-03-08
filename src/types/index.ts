@@ -13,6 +13,7 @@ export interface currentSchedule {
     capacity?: number,
     office?: string,
     total_page?: number,
+    total_data?: number
 }
 
 export interface user {
@@ -65,4 +66,19 @@ export interface register {
     nik: string,
     password: string,
     office_id: number
+}
+
+export interface check {
+    id?: number,
+    name?: string,
+    nik?: string,
+    vaccinestatus?: string,
+    CheckData?: {
+        id?: number,
+        scheduledate?: string,
+        checkin?: string,
+        checkout?: string,
+        checktemperature?: number,
+        checkstatus?: string
+    }
 }
