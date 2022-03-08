@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { FaUserAlt } from "react-icons/fa";
 import { BiLogOut } from "react-icons/bi";
 import { useDispatch } from "react-redux";
 import { reduxAction } from "../stores/actions/action";
+import { user } from "../types";
 import axios from "axios";
 import Logo from "../assets/images/logo.svg";
+import Avatar from "react-avatar";
 
 const Navbar = () => {
   const dispatch = useDispatch();
-  const [name, setName] = useState("");
+  const [data, setData] = useState<user>();
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -23,7 +24,7 @@ const Navbar = () => {
   const fetchProfile = async () => {
     await axios.get("/profile").then((res) => {
       const { data } = res;
-      setName(data.name);
+      setData(data);
     });
   };
 
@@ -51,7 +52,7 @@ const Navbar = () => {
         </button>
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
-            <li className="nav-item my-auto py-2 py-lg-0">
+            <li className="nav-item ms-auto my-auto py-2 py-lg-0">
               <div className="dropdown">
                 <button
                   className="btn dropdown-toggle text-capitalize"
@@ -60,10 +61,17 @@ const Navbar = () => {
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
-                  Hi, {name.split(" ")[0]}
-                  <div className="avatar bg-dark p-2 fs-6 ms-2 rounded-circle text-white">
-                    <FaUserAlt />
-                  </div>
+                  Hi, {data?.name.split(" ")[0]}
+                  <span className="mx-1">
+                    {data?.image_url && (
+                      <Avatar
+                        className="shadow-sm"
+                        size="33"
+                        round={true}
+                        src={data?.image_url}
+                      />
+                    )}
+                  </span>
                 </button>
                 <ul
                   className="dropdown-menu dropdown-menu-end"
