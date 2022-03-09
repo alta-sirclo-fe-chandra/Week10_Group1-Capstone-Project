@@ -597,7 +597,7 @@ const User = () => {
                   <Button variant="outline-tertiary" onClick={handleCloseCheckOutModal}>
                     Tidak
                   </Button>
-                  <Button variant="secondary" onClick={() => handleCheckOut}>
+                  <Button variant="secondary" onClick={() => handleCheckOut()}>
                     Ya, konfirmasi
                   </Button>
                 </Modal.Footer>
