@@ -331,6 +331,7 @@ const User = () => {
     setShowCheckOutModal(false);
   }
   const handleCheckOut = () => {
+    setShowCheckOutModal(false);
     const formData = new FormData();
     const today = formatReactDate(new Date(), true);
     const id = requests.find((request: any) => request.date.substring(0,10) === today).id;
