@@ -922,7 +922,7 @@ const User = () => {
                         {`Vaksin ${index+1}`}
                       </div>
                       <div className="text-muted" style={{fontSize: '0.7rem'}}>
-                        Menunggu Verifikasi
+                        Belum Diunggah
                       </div>
                     </div>
                     <div className="d-flex align-items-center text-muted">
