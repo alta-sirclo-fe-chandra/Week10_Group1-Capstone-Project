@@ -21,8 +21,6 @@ const User = () => {
   const [employeeImage, setEmployeeImage] = useState<string>('');
   const [employeeNIK, setEmployeeNIK] = useState<string>('');
   const [employeeOffice, setEmployeeOffice] = useState<string>('');
-  // const [employeeId, setEmployeeId] = useState<string>('');
-  // const [employeeVaccineStat, setEmployeeVaccineStat] = useState<string>('');
 
   const [temperature, setTemperature] = useState<string>('');
 
@@ -75,8 +73,6 @@ const User = () => {
       setEmployeeImage(data.image_url);
       setEmployeeNIK(data.nik);
       setEmployeeOffice(data.office);
-      // setEmployeeVaccineStat(data.vaccine_status);
-      // setEmployeeId(data.id);
     })
     .catch((err) => {
       console.log(err);
@@ -106,23 +102,8 @@ const User = () => {
       })
       setCertificates(certificateOrder);
     })
-    .catch(function (error) {
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.log(error.response.data);
-        console.log(error.response.status);
-        console.log(error.response.headers);
-      } else if (error.request) {
-        // The request was made but no response was received
-        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-        // http.ClientRequest in node.js
-        console.log(error.request);
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.log('Error', error.message);
-      }
-      console.log(error.config);
+    .catch((err) => {
+      console.log(err);
     });
   }, []);
   
@@ -147,23 +128,8 @@ const User = () => {
       const { data } = res;
       data !== null ? setSchedules(data) : setSchedules([]);
     })
-    .catch(function (error) {
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.log(error.response.data);
-        console.log(error.response.status);
-        console.log(error.response.headers);
-      } else if (error.request) {
-        // The request was made but no response was received
-        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-        // http.ClientRequest in node.js
-        console.log(error.request);
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.log('Error', error.message);
-      }
-      console.log(error.config);
+    .catch((err) => {
+      console.log(err);
     })
   }
   
@@ -191,23 +157,8 @@ const User = () => {
       setRequests(data.attendance);
       setTotalPage(data.total_page);
     })
-    .catch(function (error) {
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.log(error.response.data);
-        console.log(error.response.status);
-        console.log(error.response.headers);
-      } else if (error.request) {
-        // The request was made but no response was received
-        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-        // http.ClientRequest in node.js
-        console.log(error.request);
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.log('Error', error.message);
-      }
-      console.log(error.config);
+    .catch((err) => {
+      console.log(err);
     });
   }
   
@@ -395,12 +346,6 @@ const User = () => {
       })
       .catch(function (error) {
         if (error.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          console.log(`%c${error.response.data.message}`, "color:green");
-          
-          console.log(`%c${error.response.status}`, "color:red");
-          console.log(`%c${error.response.headers}`, "color:blue");
           if (error.response.data.message === "request telah ada") {
             Swal.fire({
               icon: 'error',
@@ -420,17 +365,7 @@ const User = () => {
               text: 'Anda telah melewati batas waktu untuk permohonan di hari ini. Silakan coba hari lainnya'
             })
           }
-        } else if (error.request) {
-          // The request was made but no response was received
-          // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-          // http.ClientRequest in node.js
-          console.log(`%c${error.request}`, "color:pink");
-          console.log(error.request);
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          console.log('Error', `%c${error.message}`, "color:purple");
         }
-        console.log(`error.config`);
       });
   }
 
@@ -464,23 +399,8 @@ const User = () => {
           timer: 1500
         })
       })
-      .catch(function (error) {
-        if (error.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          console.log(error.response.data);
-          console.log(error.response.status);
-          console.log(error.response.headers);
-        } else if (error.request) {
-          // The request was made but no response was received
-          // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-          // http.ClientRequest in node.js
-          console.log(error.request);
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          console.log('Error', error.message);
-        }
-        console.log(error.config);
+      .catch((err) => {
+        console.log(err);
       });
   }
 
