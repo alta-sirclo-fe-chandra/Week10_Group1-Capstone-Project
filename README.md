@@ -17,7 +17,7 @@ This project tries to simulate a work-from-office request and confirmation appli
 
 ## Deployment
 
-Deployment link: https://safety-protocol.vercel.app/
+Deployment link: https://safety-protocol-cyan.vercel.app/
 
 ## Features
 
