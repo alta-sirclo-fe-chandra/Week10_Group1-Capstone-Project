@@ -51,6 +51,9 @@ ol li div {
   width: 90%;
 }
 
+.resp-width {
+  width: 90% !important;
+}
 
 
 @media (max-width: 998px) {
@@ -74,6 +77,6 @@ ol li div {
   }
 
   .resp-width {
-    width: 100%;
+    width: 100% !important;
   }
 }

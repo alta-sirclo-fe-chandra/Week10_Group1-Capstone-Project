@@ -436,7 +436,7 @@ const User = () => {
         {/* Kolom 1 */}
         <div className="col col-lg-8 pb-4">
           {/* CheckIn Card */}
-          <div className="container d-flex col p-2 mr-4 justify-content-between w-90 resp-width" style={{borderRadius: "5px", backgroundColor: "lightgrey"}}>
+          <div className="container d-flex col p-2 mr-4 justify-content-between resp-width" style={{borderRadius: "5px", backgroundColor: "lightgrey"}}>
             <div className="col">
               <h6>{moment().format("dddd, Do MMMM YYYY")}</h6>
               <h6 style={{fontSize: "0.8rem"}} className="text-muted">{moment().format("HH.MM") + " WIB"}</h6>
@@ -527,12 +527,12 @@ const User = () => {
               </Modal>
             </div>
           {/* Work Request Card (Calendar + Attendance Section) */}
-          <div className="container d-flex col p-2 mr-4 my-4 column w-90 resp-width" style={{borderRadius: "5px"}}>
+          <div className="container d-flex col p-2 mr-4 my-4 column resp-width" style={{borderRadius: "5px"}}>
             {/* Calendar Section */}
             <div className="d-flex resp-width row">
               <p style={{fontSize: "1rem"}}>Lokasi</p>
               <div>
-                <select className="form-select form-select-sm w-90 resp-width" aria-label=".form-select-sm"
+                <select className="form-select form-select-sm resp-width" aria-label=".form-select-sm"
                   style={{marginBottom: "10px"}}
                   onChange={(e) => {
                     setTargetOffice(parseInt(e.target.value));
@@ -543,7 +543,7 @@ const User = () => {
                   ))}
                 </select>
               </div>
-              <div className="w-90 resp-width">
+              <div className="resp-width">
                 {schedules && <Calendar
                   className="rounded"
                   showFixedNumberOfWeeks={true}
@@ -681,7 +681,7 @@ const User = () => {
             </div>
           </div>
           {/* History Section */}
-          <div className="container d-flex p-2 mr-4 mt-2 w-90 resp-width" style={{borderRadius: "5px"}}>
+          <div className="container d-flex p-2 mr-4 mt-2 resp-width" style={{borderRadius: "5px"}}>
             <div className="row">
               <div>
                 <p style={{fontSize: "1rem"}}>Riwayat Permohonan Work from Office (WFO)</p>
