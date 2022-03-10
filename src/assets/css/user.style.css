@@ -1,3 +1,9 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 ol {
   list-style: none;
 }
@@ -39,4 +45,35 @@ ol li {
 
 ol li div {
   font-size: medium;
+}
+
+.w-90 {
+  width: 90%;
+}
+
+
+
+@media (max-width: 998px) {
+  * {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  .column-reverse {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+
+  .column {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .margin-top {
+    margin-top: 1em;
+  }
+
+  .resp-width {
+    width: 100%;
+  }
 }
