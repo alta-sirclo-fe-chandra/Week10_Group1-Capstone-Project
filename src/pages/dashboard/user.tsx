@@ -8,7 +8,7 @@ import 'react-calendar/dist/Calendar.css';
 import Swal from "sweetalert2";
 import EmployeeCard from "../../components/employeeCard";
 import RequestStatusLabel from "../../components/requestStatusLabel";
-import style from "../../assets/css/user.module.css";
+import "../../assets/css/user.style.css";
 import { 
   FaSyringe, 
   FaInfoCircle, 
@@ -21,8 +21,6 @@ const User = () => {
   const [employeeImage, setEmployeeImage] = useState<string>('');
   const [employeeNIK, setEmployeeNIK] = useState<string>('');
   const [employeeOffice, setEmployeeOffice] = useState<string>('');
-  // const [employeeId, setEmployeeId] = useState<string>('');
-  // const [employeeVaccineStat, setEmployeeVaccineStat] = useState<string>('');
 
   const [temperature, setTemperature] = useState<string>('');
 
@@ -75,8 +73,6 @@ const User = () => {
       setEmployeeImage(data.image_url);
       setEmployeeNIK(data.nik);
       setEmployeeOffice(data.office);
-      // setEmployeeVaccineStat(data.vaccine_status);
-      // setEmployeeId(data.id);
     })
     .catch((err) => {
       console.log(err);
@@ -106,23 +102,8 @@ const User = () => {
       })
       setCertificates(certificateOrder);
     })
-    .catch(function (error) {
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.log(error.response.data);
-        console.log(error.response.status);
-        console.log(error.response.headers);
-      } else if (error.request) {
-        // The request was made but no response was received
-        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-        // http.ClientRequest in node.js
-        console.log(error.request);
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.log('Error', error.message);
-      }
-      console.log(error.config);
+    .catch((err) => {
+      console.log(err);
     });
   }, []);
   
@@ -147,23 +128,8 @@ const User = () => {
       const { data } = res;
       data !== null ? setSchedules(data) : setSchedules([]);
     })
-    .catch(function (error) {
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.log(error.response.data);
-        console.log(error.response.status);
-        console.log(error.response.headers);
-      } else if (error.request) {
-        // The request was made but no response was received
-        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-        // http.ClientRequest in node.js
-        console.log(error.request);
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.log('Error', error.message);
-      }
-      console.log(error.config);
+    .catch((err) => {
+      console.log(err);
     })
   }
   
@@ -191,23 +157,8 @@ const User = () => {
       setRequests(data.attendance);
       setTotalPage(data.total_page);
     })
-    .catch(function (error) {
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.log(error.response.data);
-        console.log(error.response.status);
-        console.log(error.response.headers);
-      } else if (error.request) {
-        // The request was made but no response was received
-        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-        // http.ClientRequest in node.js
-        console.log(error.request);
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.log('Error', error.message);
-      }
-      console.log(error.config);
+    .catch((err) => {
+      console.log(err);
     });
   }
   
@@ -395,12 +346,6 @@ const User = () => {
       })
       .catch(function (error) {
         if (error.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          console.log(`%c${error.response.data.message}`, "color:green");
-          
-          console.log(`%c${error.response.status}`, "color:red");
-          console.log(`%c${error.response.headers}`, "color:blue");
           if (error.response.data.message === "request telah ada") {
             Swal.fire({
               icon: 'error',
@@ -420,17 +365,7 @@ const User = () => {
               text: 'Anda telah melewati batas waktu untuk permohonan di hari ini. Silakan coba hari lainnya'
             })
           }
-        } else if (error.request) {
-          // The request was made but no response was received
-          // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-          // http.ClientRequest in node.js
-          console.log(`%c${error.request}`, "color:pink");
-          console.log(error.request);
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          console.log('Error', `%c${error.message}`, "color:purple");
         }
-        console.log(`error.config`);
       });
   }
 
@@ -464,23 +399,8 @@ const User = () => {
           timer: 1500
         })
       })
-      .catch(function (error) {
-        if (error.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          console.log(error.response.data);
-          console.log(error.response.status);
-          console.log(error.response.headers);
-        } else if (error.request) {
-          // The request was made but no response was received
-          // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-          // http.ClientRequest in node.js
-          console.log(error.request);
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          console.log('Error', error.message);
-        }
-        console.log(error.config);
+      .catch((err) => {
+        console.log(err);
       });
   }
 
@@ -505,15 +425,18 @@ const User = () => {
   return (
     <div className="container">
       {/* Whole Page */}
-      <div className="d-flex mt-2 mx-5 px-5">
-        {/* Employee Greeting */}
-        <h4 style={{textTransform: "capitalize"}}>Hi, {employeeName}! 👋</h4>
-      </div>
       <div className="d-flex justify-content-center mt-2">
+        <div className="container col col-lg-8">
+          {/* Employee Greeting */}
+          <span style={{fontSize: "1.5rem", textTransform: "capitalize"}}>Hi, {employeeName}! 👋</span>
+        </div>
+        <div className="col-lg-2"></div>
+      </div>
+      <div className="d-flex justify-content-center mt-2 column-reverse">
         {/* Kolom 1 */}
-        <div className="col col-md-8 pb-4">
+        <div className="col col-lg-8 pb-4">
           {/* CheckIn Card */}
-          <div className="container d-flex col p-2 mr-4 justify-content-between" style={{borderRadius: "5px", width: "90%", backgroundColor: "lightgrey"}}>
+          <div className="container d-flex col p-2 mr-4 justify-content-between resp-width" style={{borderRadius: "5px", backgroundColor: "lightgrey"}}>
             <div className="col">
               <h6>{moment().format("dddd, Do MMMM YYYY")}</h6>
               <h6 style={{fontSize: "0.8rem"}} className="text-muted">{moment().format("HH.MM") + " WIB"}</h6>
@@ -604,13 +527,13 @@ const User = () => {
               </Modal>
             </div>
           {/* Work Request Card (Calendar + Attendance Section) */}
-          <div className="container d-flex col p-2 mr-4 my-4" style={{borderRadius: "5px", width: "90%"}}>
+          <div className="container d-flex col p-2 mr-4 my-4 column resp-width" style={{borderRadius: "5px"}}>
             {/* Calendar Section */}
-            <div className="d-flex w-50 row">
-              <h6>Lokasi</h6>
+            <div className="d-flex resp-width row">
+              <p style={{fontSize: "1rem"}}>Lokasi</p>
               <div>
-                <select className="form-select form-select-sm" aria-label=".form-select-sm"
-                  style={{width: "90%", marginBottom: "10px"}}
+                <select className="form-select form-select-sm resp-width" aria-label=".form-select-sm"
+                  style={{marginBottom: "10px"}}
                   onChange={(e) => {
                     setTargetOffice(parseInt(e.target.value));
                   }}
@@ -620,7 +543,7 @@ const User = () => {
                   ))}
                 </select>
               </div>
-              <div style={{width: "91%"}}>
+              <div className="resp-width">
                 {schedules && <Calendar
                   className="rounded"
                   showFixedNumberOfWeeks={true}
@@ -653,10 +576,10 @@ const User = () => {
             </div>
             {/* Attendance Section */}
             <div className="d-flex row" style={{margin: "0 auto", width: "calc(100% - 20px)"}}>
-              <div>
-                <strong>
+              <div className="margin-top">
+                <p style={{fontWeight: "bold"}}>
                   Karyawan Work from Office
-                </strong>
+                </p>
               </div>
               {attendants
               ? <div data-bs-spy="scroll" data-bs-offset="0" className="scrollspy-example" tabIndex={0} style={{height: '380px', overflowY: 'scroll'}}>
@@ -758,10 +681,10 @@ const User = () => {
             </div>
           </div>
           {/* History Section */}
-          <div className="container d-flex p-2 mr-4 mt-2" style={{borderRadius: "5px", width: "90%"}}>
+          <div className="container d-flex p-2 mr-4 mt-2 resp-width" style={{borderRadius: "5px"}}>
             <div className="row">
               <div>
-                <h6>Riwayat Permohonan Work from Office (WFO)</h6>
+                <p style={{fontSize: "1rem"}}>Riwayat Permohonan Work from Office (WFO)</p>
               </div>
               {!requests ?
                 <div className="text-center pt-2">
@@ -775,39 +698,43 @@ const User = () => {
                   </div>
                 </div>
                 : <div style={{margin: "0 auto", width: "calc(100% - 2px)"}}>
-                  <div className="p-2" style={{borderRadius: "5px", backgroundColor: "lightgrey"}}><FaHandPointer /> &nbsp; Klik kolom Tanggal WFO atau Tanggal Permohonan WFO untuk mengurutkan</div>
-                  <table className="table table-borderless table-hover mt-2" style={{margin: "0 auto", width: "calc(100% - 2px)"}}>
-                    <thead style={{backgroundColor: "lightgrey"}}>
-                      <tr>
-                        <th scope="col" className="align-middle">No</th>
-                        <th scope="col" className="align-middle">
-                          <button style={{background: "none", border: "none"}} onClick={() => setIsSortByRecent(true)}>
-                            <strong>Tanggal WFO</strong>
-                          </button>
-                        </th>
-                        <th scope="col" className="align-middle">
-                          <button style={{background: "none", border: "none"}} onClick={() => setIsSortByRecent(false)}>
-                            <strong>Tanggal Permohonan WFO</strong>
-                          </button>
-                        </th>
-                        <th scope="col" className="align-middle">Lokasi</th>
-                        <th scope="col" className="align-middle">Status</th>
-                        <th scope="col" className="align-middle">Keterangan</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {requests?.map((request: any, index: number) => (
-                        <tr key={request.id}>
-                          <td>{index+1}</td>
-                          <td>{request.date.slice(0,10)}</td>
-                          <td>{request.request_time.slice(0,10)}</td>
-                          <td>{request.office}</td>
-                          <td><RequestStatusLabel content={request.status} /></td>
-                          <td><small style={{fontSize: "0.7rem"}}>{request.status_info}</small></td>
+                  <div className="container p-2" style={{borderRadius: "5px", backgroundColor: "lightgrey"}}>
+                    <FaHandPointer /> &nbsp; Klik kolom Tanggal WFO atau Tanggal Permohonan WFO untuk mengurutkan
+                  </div>
+                  <div className="table-responsive-md" style={{maxWidth: '100vw'}}>
+                    <table className="table table-borderless table-hover mt-2" style={{margin: "0 auto", width: "calc(100% - 2px)"}}>
+                      <thead style={{backgroundColor: "lightgrey"}}>
+                        <tr>
+                          <th scope="col" className="align-middle">No</th>
+                          <th scope="col" className="align-middle">
+                            <button style={{background: "none", border: "none"}} onClick={() => setIsSortByRecent(true)}>
+                              <strong>Tanggal WFO</strong>
+                            </button>
+                          </th>
+                          <th scope="col" className="align-middle">
+                            <button style={{background: "none", border: "none"}} onClick={() => setIsSortByRecent(false)}>
+                              <strong>Tanggal Permohonan WFO</strong>
+                            </button>
+                          </th>
+                          <th scope="col" className="align-middle">Lokasi</th>
+                          <th scope="col" className="align-middle">Status</th>
+                          <th scope="col" className="align-middle">Keterangan</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {requests?.map((request: any, index: number) => (
+                          <tr key={request.id}>
+                            <td>{index+1}</td>
+                            <td>{request.date.slice(0,10)}</td>
+                            <td>{request.request_time.slice(0,10)}</td>
+                            <td>{request.office}</td>
+                            <td><RequestStatusLabel content={request.status} /></td>
+                            <td><small style={{fontSize: "0.7rem"}}>{request.status_info}</small></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               }
               <div className="d-flex justify-content-center">
@@ -843,7 +770,7 @@ const User = () => {
         </div>
 
         {/* Kolom 2 */}
-        <div className="col col-md-3">
+        <div className="col col-lg-3">
           {/* Profile Card */}
           <div style={{borderRadius: "5px"}}>
             <div className="d-flex container p-2" style={{borderRadius: "5px", backgroundColor: "lightgrey"}}>
@@ -885,7 +812,7 @@ const User = () => {
               <ol>
                 {certificates?.map((certificate: string, index: number) => (
                   certificate === "Approved"
-                  ? <li key={index} className={style.green}>
+                  ? <li key={index} className='green'>
                     <div className="col">
                       <div>
                         {`Vaksin ${index+1}`}
@@ -901,7 +828,7 @@ const User = () => {
                     </div>
                   </li>
                   : certificate === "Pending"
-                  ? <li key={index} className={style.blue}>
+                  ? <li key={index} className='blue'>
                     <div className="col">
                       <div>
                         {`Vaksin ${index+1}`}
@@ -916,7 +843,7 @@ const User = () => {
                       </button>
                     </div>
                   </li>
-                  : <li key={index} className={style.red}>
+                  : <li key={index} className='red'>
                     <div className="col">
                       <div>
                         {`Vaksin ${index+1}`}
