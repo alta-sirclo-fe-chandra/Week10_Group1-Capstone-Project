@@ -31,10 +31,13 @@ Deployment link: https://safety-protocol-cyan.vercel.app/
 ## Libraries and Dependencies
 
 - React
+- Typescript
 - Axios
 - Moment
-- React-Acatar
+- Redux
+- Bootstrap
 - React-Bootstrap
+- React-Avatar
 - React-Calendar
 - React-Icons
 - React-Lottie
